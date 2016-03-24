@@ -1,4 +1,7 @@
 # parse-server-fs-adapter
+[![Build Status](https://travis-ci.org/parse-server-modules/parse-server-fs-adapter.svg?branch=master)](https://travis-ci.org/parse-server-modules/parse-server-fs-adapter)
+[![codecov.io](https://codecov.io/github/parse-server-modules/parse-server-fs-adapter/coverage.svg?branch=master)](https://codecov.io/github/parse-server-modules/parse-server-fs-adapter?branch=master)
+
 parse-server file system storage adapter 
 
 

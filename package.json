@@ -14,7 +14,7 @@
   ],
   "author": "Parse",
   "license": "MIT",
-  "dependencies": {
+  "devDependencies": {
     "jasmine": "^2.4.1",
     "parse-server-conformance-tests": "^1.0.0"
   }
