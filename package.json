@@ -1,0 +1,21 @@
+{
+  "name": "parse-server-fs-adapter",
+  "version": "1.0.0",
+  "description": "File system adapter for parse-server",
+  "main": "index.js",
+  "scripts": {
+    "test": "jasmine"
+  },
+  "keywords": [
+    "parse-server",
+    "adapter",
+    "file",
+    "system"
+  ],
+  "author": "Parse",
+  "license": "MIT",
+  "dependencies": {
+    "jasmine": "^2.4.1",
+    "parse-server-conformance-tests": "^1.0.0"
+  }
+}
