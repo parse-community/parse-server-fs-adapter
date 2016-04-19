@@ -61,7 +61,7 @@ FileSystemAdapter.prototype.getFileData = function(filename) {
 }
 
 FileSystemAdapter.prototype.getFileLocation = function(config, filename) {
-  return (config.mount + '/' + this._getLocalFilePath(filename));
+  return config.mount + '/files/' + config.applicationId + '/' + encodeURIComponent(filename);
 }
 
 /*
