@@ -66,11 +66,16 @@ FileSystemAdapter.prototype.getFileLocation = function(config, filename) {
 }
 
 FileSystemAdapter.prototype.getFilesList = function() {
-  dir.files(this._filesDir, function(err, files) {
-    if (err) throw err;
-    return files;
+  return new Promise((resolve, reject) => {
+        dir.files(this._filesDir, function(err, files) {
+        if (err !== null) {
+          return reject(err)
+        }
+        resolve(files);
+      });
   });
 }
+
 
 /*
   Helpers
