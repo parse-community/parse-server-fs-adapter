@@ -7,6 +7,7 @@
 var fs = require('fs');
 var path = require('path');
 var pathSep = require('path').sep;
+var dir = require('node-dir');
 
 function FileSystemAdapter(options) {
   options = options || {};
@@ -63,6 +64,18 @@ FileSystemAdapter.prototype.getFileData = function(filename) {
 FileSystemAdapter.prototype.getFileLocation = function(config, filename) {
   return config.mount + '/files/' + config.applicationId + '/' + encodeURIComponent(filename);
 }
+
+FileSystemAdapter.prototype.getFilesList = function() {
+  return new Promise((resolve, reject) => {
+        dir.files(this._filesDir, function(err, files) {
+        if (err !== null) {
+          return reject(err)
+        }
+        resolve(files);
+      });
+  });
+}
+
 
 /*
   Helpers
