@@ -15,7 +15,7 @@
   "author": "Parse",
   "license": "MIT",
   "devDependencies": {
-    "codecov": "^1.0.1",
+    "codecov": "^2.1.0",
     "istanbul": "^0.4.2",
     "jasmine": "^2.4.1",
     "parse-server-conformance-tests": "^1.0.0"
