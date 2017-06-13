@@ -8,5 +8,7 @@ describe('FileSystemAdapter tests', () => {
     filesSubDirectory: 'sub1/sub2'
   });
 
-  filesAdapterTests.testAdapter("FileSystemAdapter", fsAdapter);  
+    filesAdapterTests.testAdapter("FileSystemAdapter", fsAdapter);
 })
+
+

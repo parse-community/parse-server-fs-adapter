@@ -7,9 +7,21 @@
 var fs = require('fs');
 var path = require('path');
 var pathSep = require('path').sep;
+var nodecipher = require('node-cipher');
 
 function FileSystemAdapter(options) {
   options = options || {};
+
+    this._encrypt = false;
+    this._secretKey = "";
+
+  if (options.encrypt && options.encrypt == true){
+      if (!options.secretKey){
+          throw "Encrypt key not defined";
+      }
+      this._encrypt =true;
+      this._secretKey = options.secretKey;
+  }
   let filesSubDirectory = options.filesSubDirectory || '';
   this._filesDir = filesSubDirectory;
   this._mkdir(this._getApplicationDir());
@@ -20,14 +32,28 @@ function FileSystemAdapter(options) {
 
 FileSystemAdapter.prototype.createFile = function(filename, data) {
   return new Promise((resolve, reject) => {
-    let filepath = this._getLocalFilePath(filename);
-    fs.writeFile(filepath, data, (err) => {
-      if(err !== null) {
-        return reject(err);
-      }
-      resolve(data);
-    });
-  });
+      let filepath = this._getLocalFilePath(filename);
+
+      fs.writeFile(filepath, data, (err) => {
+          if (err !== null) {
+              return reject(err);
+          }
+          if(this._encrypt === true){
+              nodecipher.encryptSync({
+                  algorithm: 'aes-256-cbc',
+                  input: filepath,
+                  output: filepath,
+                  password: this._secretKey
+              }, function (err, opts) {
+                  if(err){
+                      return reject(err);
+                  }
+                  return resolve()
+              })
+          }
+          return resolve(data);
+      });
+  })
 }
 
 FileSystemAdapter.prototype.deleteFile = function(filename) {
@@ -51,11 +77,25 @@ FileSystemAdapter.prototype.deleteFile = function(filename) {
 FileSystemAdapter.prototype.getFileData = function(filename) {
   return new Promise((resolve, reject) => {
     let filepath = this._getLocalFilePath(filename);
-    fs.readFile( filepath , function (err, data) {
-      if(err !== null) {
-        return reject(err);
-      }
-      resolve(data);
+    if(this._encrypt && this._encrypt == true){
+        console.log(filename);
+        console.log(filepath)
+        nodecipher.decryptSync({
+            input: filepath,
+            output: filepath,
+            algorithm: 'aes-256-cbc',
+            password: this._secretKey
+        }, function (err) {
+            if (err){
+                return reject(err)
+            }
+        })
+    }
+    fs.readFile(filepath , function (err, data) {
+        if(err) {
+            return reject(err);
+        }
+        return resolve(data);
     });
   });
 }

@@ -22,6 +22,8 @@ parse-server file system storage adapter
     "module": "parse-server-fs-adapter",
     "options": {
       "filesSubDirectory": "my/files/folder" // optional
+      "encrypt": true //optional,
+      "secretKey: 'someKey' //mandatory if encrypt is true
     } 
   }
 }
