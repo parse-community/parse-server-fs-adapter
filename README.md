@@ -7,7 +7,7 @@ parse-server file system storage adapter
 
 # installation
 
-`npm install --save parse-server-fs-adapter`
+`npm install --save @parse/fs-files-adapter`
 
 # usage with parse-server
 
@@ -19,7 +19,7 @@ parse-server file system storage adapter
   "masterKey": 'my_master_key',
   // other options
   "filesAdapter": {
-    "module": "parse-server-fs-adapter",
+    "module": "@parse/fs-files-adapter",
     "options": {
       "filesSubDirectory": "my/files/folder" // optional
     } 
@@ -30,7 +30,7 @@ parse-server file system storage adapter
 ### passing as an instance
 
 ```
-var FSFilesAdapter = require('parse-server-fs-adapter');
+var FSFilesAdapter = require('@parse/fs-files-adapter');
 
 var fsAdapter = new FSFilesAdapter({
       "filesSubDirectory": "my/files/folder" // optional
