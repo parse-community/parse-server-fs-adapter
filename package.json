@@ -3,6 +3,10 @@
   "version": "1.0.1",
   "description": "File system adapter for parse-server",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/parse-community/parse-server-fs-adapter"
+  },
   "scripts": {
     "test": "nyc jasmine"
   },
