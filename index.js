@@ -8,7 +8,7 @@ var fs = require('fs');
 var path = require('path');
 var pathSep = require('path').sep;
 const crypto = require("crypto");
-const algorithm = 'aes-256-cbc';
+const algorithm = 'aes-256-gcm';
 
 function FileSystemAdapter(options) {
   options = options || {};
@@ -47,7 +47,9 @@ FileSystemAdapter.prototype.createFile = function(filename, data) {
               if (err !== null) {
                 return reject(err);
               }
+              const authTag = cipher.getAuthTag();
               fs.appendFileSync(filepath, iv);
+              fs.appendFileSync(filepath, authTag);
               resolve(data);
             });
           });
@@ -85,10 +87,13 @@ FileSystemAdapter.prototype.getFileData = function(filename) {
         return reject(err);
       }
       if(secretKey !== null){
-        const ivLocation = data.length - 16;
-        const iv = data.slice(ivLocation);
+        const authTagLocation = data.length - 16;
+        const ivLocation = data.length - 32;
+        const authTag = data.slice(authTagLocation);
+        const iv = data.slice(ivLocation,authTagLocation);
         const encrypted = data.slice(0,ivLocation);
         const decipher = crypto.createDecipheriv(algorithm, secretKey, iv);
+        decipher.setAuthTag(authTag)
         resolve(Buffer.concat([decipher.update(encrypted), decipher.final()]));
       }
       resolve(data);
