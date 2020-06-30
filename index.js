@@ -12,14 +12,9 @@ const algorithm = 'aes-256-cbc';
 
 function FileSystemAdapter(options) {
   options = options || {};
-  this._encrypt = false;
-  this._secretKey = "";
+  this._secretKey = null;
 
-  if (options.encrypt && options.encrypt == true){
-    if (!options.secretKey){
-        throw "Encrypt key not defined";
-    }
-    this._encrypt = true;
+  if (options.secretKey !== undefined){
     this._secretKey = crypto.createHash('sha256').update(String(options.secretKey)).digest('base64').substr(0, 32);
   }
   let filesSubDirectory = options.filesSubDirectory || '';
@@ -37,8 +32,8 @@ FileSystemAdapter.prototype.createFile = function(filename, data) {
       if(err !== null) {
         return reject(err);
       }
-      if(this._encrypt === true){	  
-        const iv = crypto.createHash('sha256').update(String(this._secretKey)).digest('base64').substr(0, 16);
+      if(this._secretKey !== null){	  
+        const iv = crypto.randomBytes(16);
         const cipher = crypto.createCipheriv(algorithm, this._secretKey, iv);
         const input = fs.createReadStream(filepath);
         const output = fs.createWriteStream(filepath+'.enc');
@@ -52,6 +47,7 @@ FileSystemAdapter.prototype.createFile = function(filename, data) {
               if (err !== null) {
                 return reject(err);
               }
+              fs.appendFileSync(filepath, iv);
               resolve(data);
             });
           });
@@ -83,16 +79,17 @@ FileSystemAdapter.prototype.deleteFile = function(filename) {
 FileSystemAdapter.prototype.getFileData = function(filename) {
   return new Promise((resolve, reject) => {
     let filepath = this._getLocalFilePath(filename);
-    const encrypt = this._encrypt;
     const secretKey = this._secretKey;
     fs.readFile( filepath , function (err, data) {
       if(err !== null) {
         return reject(err);
       }
-      if(encrypt){
-         const iv = crypto.createHash('sha256').update(String(secretKey)).digest('base64').substr(0, 16);
-         const decipher = crypto.createDecipheriv(algorithm, secretKey, iv);
-         resolve(Buffer.concat([decipher.update(data), decipher.final()]));
+      if(secretKey !== null){
+        const ivLocation = data.length - 16;
+        const iv = data.slice(ivLocation);
+        const encrypted = data.slice(0,ivLocation);
+        const decipher = crypto.createDecipheriv(algorithm, secretKey, iv);
+        resolve(Buffer.concat([decipher.update(encrypted), decipher.final()]));
       }
       resolve(data);
     });

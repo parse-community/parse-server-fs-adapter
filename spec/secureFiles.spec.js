@@ -24,7 +24,6 @@ describe('File encryption tests', () => {
     it("should save/delete file in it's encrypted format", async function(done) {
         var adapter = new FileSystemAdapter({
             filesSubDirectory: directory,
-            encrypt: true,
             secretKey: '89E4AFF1-DFE4-4603-9574-BFA16BB446FD'
         });
         var filename = 'file2.txt';
