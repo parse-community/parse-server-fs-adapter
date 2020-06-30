@@ -20,7 +20,7 @@ function FileSystemAdapter(options) {
         throw "Encrypt key not defined";
     }
     this._encrypt = true;
-    this._secretKey = crypto.scryptSync(options.secretKey, 'salt', 32);
+    this._secretKey = crypto.createHash('sha256').update(String(options.secretKey)).digest('base64').substr(0, 32);//crypto.scryptSync(options.secretKey, 'salt', 32);
   }
   let filesSubDirectory = options.filesSubDirectory || '';
   this._filesDir = filesSubDirectory;
@@ -38,7 +38,7 @@ FileSystemAdapter.prototype.createFile = function(filename, data) {
         return reject(err);
       }
       if(this._encrypt === true){	  
-        const iv = crypto.scryptSync(this._secretKey, 'salt', 16); // Initialization vector.
+        const iv = crypto.createHash('sha256').update(String(this._secretKey)).digest('base64').substr(0, 16);//crypto.scryptSync(this._secretKey, 'salt', 16); // Initialization vector.
         const cipher = crypto.createCipheriv(algorithm, this._secretKey, iv);
         const input = fs.createReadStream(filepath);
         const output = fs.createWriteStream(filepath+'.enc');
@@ -90,7 +90,7 @@ FileSystemAdapter.prototype.getFileData = function(filename) {
         return reject(err);
       }
       if(encrypt){
-         const iv = crypto.scryptSync(secretKey, 'salt', 16);
+         const iv = crypto.createHash('sha256').update(String(secretKey)).digest('base64').substr(0, 16);//crypto.scryptSync(secretKey, 'salt', 16);
          const decipher = crypto.createDecipheriv(algorithm, secretKey, iv);
          resolve(Buffer.concat([decipher.update(data), decipher.final()]));
       }
