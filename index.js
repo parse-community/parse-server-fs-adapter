@@ -7,9 +7,21 @@
 var fs = require('fs');
 var path = require('path');
 var pathSep = require('path').sep;
+const crypto = require("crypto");
+const algorithm = 'aes-256-cbc';
 
 function FileSystemAdapter(options) {
   options = options || {};
+  this._encrypt = false;
+  this._secretKey = "";
+
+  if (options.encrypt && options.encrypt == true){
+    if (!options.secretKey){
+        throw "Encrypt key not defined";
+    }
+    this._encrypt = true;
+    this._secretKey = crypto.scryptSync(options.secretKey, 'salt', 32);
+  }
   let filesSubDirectory = options.filesSubDirectory || '';
   this._filesDir = filesSubDirectory;
   this._mkdir(this._getApplicationDir());
@@ -25,7 +37,28 @@ FileSystemAdapter.prototype.createFile = function(filename, data) {
       if(err !== null) {
         return reject(err);
       }
-      resolve(data);
+      if(this._encrypt === true){	  
+        const iv = crypto.scryptSync(this._secretKey, 'salt', 16); // Initialization vector.
+        const cipher = crypto.createCipheriv(algorithm, this._secretKey, iv);
+        const input = fs.createReadStream(filepath);
+        const output = fs.createWriteStream(filepath+'.enc');
+        input.pipe(cipher).pipe(output);
+        output.on('finish', function() {
+          fs.unlink(filepath, function(err) {
+            if (err !== null) {
+              return reject(err);
+            }
+            fs.rename(filepath+'.enc', filepath, function(err) {
+              if (err !== null) {
+                return reject(err);
+              }
+              resolve(data);
+            });
+          });
+        });           
+      }else{
+        resolve(data);
+      }
     });
   });
 }
@@ -44,16 +77,22 @@ FileSystemAdapter.prototype.deleteFile = function(filename) {
         resolve(data);
       });
     });
-
   });
 }
 
 FileSystemAdapter.prototype.getFileData = function(filename) {
   return new Promise((resolve, reject) => {
     let filepath = this._getLocalFilePath(filename);
+    const encrypt = this._encrypt;
+    const secretKey = this._secretKey;
     fs.readFile( filepath , function (err, data) {
       if(err !== null) {
         return reject(err);
+      }
+      if(encrypt){
+         const iv = crypto.scryptSync(secretKey, 'salt', 16);
+         const decipher = crypto.createDecipheriv(algorithm, secretKey, iv);
+         resolve(Buffer.concat([decipher.update(data), decipher.final()]));
       }
       resolve(data);
     });
