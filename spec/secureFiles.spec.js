@@ -19,7 +19,7 @@ describe('File encryption tests', () => {
         })
     });
 
-    it("should save/delete file in it's unencrypted format", async function(done) {
+    it("should save file in it's unencrypted format", async function(done) {
         var adapter = new FileSystemAdapter({
             filesSubDirectory: directory
         });
@@ -34,7 +34,7 @@ describe('File encryption tests', () => {
         done()
     }, 5000);
 
-    it("should save/delete file in it's encrypted format", async function(done) {
+    it("should save file in it's encrypted format", async function(done) {
         var adapter = new FileSystemAdapter({
             filesSubDirectory: directory,
             fileKey: '89E4AFF1-DFE4-4603-9574-BFA16BB446FD'
