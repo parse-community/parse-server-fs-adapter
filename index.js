@@ -33,27 +33,31 @@ FileSystemAdapter.prototype.createFile = function(filename, data) {
         return reject(err);
       }
       if(this._fileKey !== null){	  
-        const iv = crypto.randomBytes(16);
-        const cipher = crypto.createCipheriv(algorithm, this._fileKey, iv);
-        const input = fs.createReadStream(filepath);
-        const output = fs.createWriteStream(filepath+'.enc');
-        input.pipe(cipher).pipe(output);
-        output.on('finish', function() {
-          fs.unlink(filepath, function(err) {
-            if (err !== null) {
-              return reject(err);
-            }
-            fs.rename(filepath+'.enc', filepath, function(err) {
+        try{
+          const iv = crypto.randomBytes(16);
+          const cipher = crypto.createCipheriv(algorithm, this._fileKey, iv);
+          const input = fs.createReadStream(filepath);
+          const output = fs.createWriteStream(filepath+'.enc');
+          input.pipe(cipher).pipe(output);
+          output.on('finish', function() {
+            fs.unlink(filepath, function(err) {
               if (err !== null) {
                 return reject(err);
               }
-              const authTag = cipher.getAuthTag();
-              fs.appendFileSync(filepath, iv);
-              fs.appendFileSync(filepath, authTag);
-              resolve(data);
+              fs.rename(filepath+'.enc', filepath, function(err) {
+                if (err !== null) {
+                  return reject(err);
+                }
+                const authTag = cipher.getAuthTag();
+                fs.appendFileSync(filepath, iv);
+                fs.appendFileSync(filepath, authTag);
+                return resolve(data);
+              });
             });
           });
-        });           
+      }catch(err){
+        return reject(err);
+      }           
       }else{
         resolve(data);
       }
@@ -92,11 +96,66 @@ FileSystemAdapter.prototype.getFileData = function(filename) {
         const authTag = data.slice(authTagLocation);
         const iv = data.slice(ivLocation,authTagLocation);
         const encrypted = data.slice(0,ivLocation);
-        const decipher = crypto.createDecipheriv(algorithm, fileKey, iv);
-        decipher.setAuthTag(authTag)
-        resolve(Buffer.concat([decipher.update(encrypted), decipher.final()]));
+        try{
+          const decipher = crypto.createDecipheriv(algorithm, fileKey, iv);
+          decipher.setAuthTag(authTag);
+          const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
+          return resolve(decrypted);
+        }catch(err){
+          return reject(err);
+        }
       }
       resolve(data);
+    });
+  });
+}
+
+FileSystemAdapter.prototype.rotateFileKey = function(options = {}) {
+  return new Promise((resolve, _reject) => {
+    const applicationDir = this._getApplicationDir();
+    var fileNames = [];
+    var oldKeyFileAdapter = {};
+    if (options.oldKey !== undefined) {
+      oldKeyFileAdapter = new FileSystemAdapter({filesSubDirectory: this._filesDir, fileKey: options.oldKey});
+    }else{
+      oldKeyFileAdapter = new FileSystemAdapter({filesSubDirectory: this._filesDir});
+    }
+    if (options.fileNames !== undefined){
+      fileNames = options.fileNames;
+    }else{
+      fileNames = fs.readdirSync(applicationDir); 
+      fileNames = fileNames.filter(fileName => fileName.indexOf('.') !== 0); 
+    }
+    var fileNamesNotRotated = fileNames;
+    var fileNamesRotated = [];
+    var fileNameTotal = fileNames.length;
+    var fileNameIndex = 0;
+    fileNames.forEach(fileName => { 
+      oldKeyFileAdapter.getFileData(fileName)
+      .then(plainTextData => {
+        //Overwrite file with data encrypted with new key
+        this.createFile(fileName, plainTextData)
+        .then(() => {
+          fileNamesRotated.push(fileName);
+          fileNamesNotRotated = fileNamesNotRotated.filter(function(value, _index, _arr){ return value !== fileName;})
+          fileNameIndex += 1;
+          if (fileNameIndex == fileNameTotal){
+            resolve({rotated: fileNamesRotated, notRotated: fileNamesNotRotated});
+          }
+        })
+        .catch(() => {
+          fileNameIndex += 1;
+          if (fileNameIndex == fileNameTotal){
+            resolve({rotated: fileNamesRotated, notRotated: fileNamesNotRotated});
+          }
+        })
+      })
+      .catch(() => {
+        fileNameIndex += 1;
+        if (fileNameIndex == fileNameTotal){
+          resolve({rotated: fileNamesRotated, notRotated: fileNamesNotRotated});
+        }
+      });
     });
   });
 }
