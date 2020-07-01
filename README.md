@@ -13,7 +13,7 @@ parse-server file system storage adapter
 
 ### using a config file
 
-```
+```javascript
 {
   "appId": 'my_app_id',
   "masterKey": 'my_master_key',
@@ -30,7 +30,7 @@ parse-server file system storage adapter
 
 ### Passing as an instance
 
-```
+```javascript
 var FSFilesAdapter = require('@parse/fs-files-adapter');
 
 var fsAdapter = new FSFilesAdapter({
@@ -49,7 +49,7 @@ var api = new ParseServer({
 Periodically you may want to rotate your fileKey for security reasons. When this is the case. Initialize the file adapter with the new key and do the following in your `index.js`:
 
 #### Files were previously unencrypted and you want to encrypt
-```
+```javascript
 var FSFilesAdapter = require('@parse/fs-files-adapter');
 
 var fsAdapter = new FSFilesAdapter({
@@ -72,7 +72,7 @@ console.log('Files that couldn't be rotated to newKey: ' + notRotated);
 
 #### Files were previously encrypted with `oldKey` and you want to encrypt with `newKey`
 The same process as above, but pass in your `oldKey` to `rotateFileKey()`.
-```
+```javascript
 //This can take awhile depending on how many files and how larger they are. It will attempt to rotate the key of all files in your filesSubDirectory
 const {rotated, notRotated} =  await api.filesAdapter.rotateFileKey({oldKey: oldKey});
 console.log('Files rotated to newKey: ' + rotated);
@@ -81,7 +81,7 @@ console.log('Files that couldn't be rotated to newKey: ' + notRotated);
 
 #### Only rotate a select list of files that were previously encrypted with `oldKey` and you want to encrypt with `newKey`
 This is useful if for some reason there errors and some of the files werent rotated and returned in `notRotated`. The same process as above, but pass in your `oldKey` along with the array of `fileNames` to `rotateFileKey()`.
-```
+```javascript
 //This can take awhile depending on how many files and how larger they are. It will attempt to rotate the key of all files in your filesSubDirectory
 const {rotated, notRotated} =  await api.filesAdapter.rotateFileKey({oldKey: oldKey, fileNames: [fileName1,fileName2]});
 console.log('Files rotated to newKey: ' + rotated);
