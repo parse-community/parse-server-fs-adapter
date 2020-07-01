@@ -4,4 +4,8 @@ branches:
 language: node_js
 node_js:
   - 8
-after_success: ./node_modules/.bin/codecov
+env:
+  global:
+    - COVERAGE_OPTION='./node_modules/.bin/nyc'
+script: npm run coverage
+after_scrypt: bash <(curl -s https://codecov.io/bash)
