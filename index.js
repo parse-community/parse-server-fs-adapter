@@ -12,10 +12,10 @@ const algorithm = 'aes-256-gcm';
 
 function FileSystemAdapter(options) {
   options = options || {};
-  this._secretKey = null;
+  this._fileKey = null;
 
-  if (options.secretKey !== undefined){
-    this._secretKey = crypto.createHash('sha256').update(String(options.secretKey)).digest('base64').substr(0, 32);
+  if (options.fileKey !== undefined){
+    this._fileKey = crypto.createHash('sha256').update(String(options.fileKey)).digest('base64').substr(0, 32);
   }
   let filesSubDirectory = options.filesSubDirectory || '';
   this._filesDir = filesSubDirectory;
@@ -32,9 +32,9 @@ FileSystemAdapter.prototype.createFile = function(filename, data) {
       if(err !== null) {
         return reject(err);
       }
-      if(this._secretKey !== null){	  
+      if(this._fileKey !== null){	  
         const iv = crypto.randomBytes(16);
-        const cipher = crypto.createCipheriv(algorithm, this._secretKey, iv);
+        const cipher = crypto.createCipheriv(algorithm, this._fileKey, iv);
         const input = fs.createReadStream(filepath);
         const output = fs.createWriteStream(filepath+'.enc');
         input.pipe(cipher).pipe(output);
@@ -81,18 +81,18 @@ FileSystemAdapter.prototype.deleteFile = function(filename) {
 FileSystemAdapter.prototype.getFileData = function(filename) {
   return new Promise((resolve, reject) => {
     let filepath = this._getLocalFilePath(filename);
-    const secretKey = this._secretKey;
+    const fileKey = this._fileKey;
     fs.readFile( filepath , function (err, data) {
       if(err !== null) {
         return reject(err);
       }
-      if(secretKey !== null){
+      if(fileKey !== null){
         const authTagLocation = data.length - 16;
         const ivLocation = data.length - 32;
         const authTag = data.slice(authTagLocation);
         const iv = data.slice(ivLocation,authTagLocation);
         const encrypted = data.slice(0,ivLocation);
-        const decipher = crypto.createDecipheriv(algorithm, secretKey, iv);
+        const decipher = crypto.createDecipheriv(algorithm, fileKey, iv);
         decipher.setAuthTag(authTag)
         resolve(Buffer.concat([decipher.update(encrypted), decipher.final()]));
       }
