@@ -87,7 +87,7 @@ console.log('Files that couldn't be rotated to newKey: ' + notRotated);
 This is useful if for some reason there errors and some of the files werent rotated and returned in `notRotated`. The same process as above, but pass in your `oldKey` along with the array of `fileNames` to `rotateFileKey()`.
 ```javascript
 //This can take awhile depending on how many files and how larger they are. It will attempt to rotate the key of all files in your filesSubDirectory
-const {rotated, notRotated} =  await api.filesAdapter.rotateFileKey({oldKey: oldKey, fileNames: [fileName1,fileName2]});
+const {rotated, notRotated} =  await api.filesAdapter.rotateFileKey({oldKey: oldKey, fileNames: ["fileName1.png","fileName2.png"]});
 console.log('Files rotated to newKey: ' + rotated);
 console.log('Files that couldn't be rotated to newKey: ' + notRotated);
 ```
