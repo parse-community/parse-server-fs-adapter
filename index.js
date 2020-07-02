@@ -137,7 +137,7 @@ FileSystemAdapter.prototype.rotateFileKey = function(options = {}) {
         this.createFile(fileName, plainTextData)
         .then(() => {
           fileNamesRotated.push(fileName);
-          fileNamesNotRotated = fileNamesNotRotated.filter(function(value, _index, _arr){ return value !== fileName;})
+          fileNamesNotRotated = fileNamesNotRotated.filter(function(value){ return value !== fileName;})
           fileNameIndex += 1;
           if (fileNameIndex == fileNameTotal){
             resolve({rotated: fileNamesRotated, notRotated: fileNamesNotRotated});

@@ -75,12 +75,11 @@ describe('File encryption tests', () => {
         expect(result instanceof Buffer).toBe(true);
         expect(result.toString('utf-8')).toEqual(data2);
         const unEncryptedData2 = fs.readFileSync(filePath2);
-
         //Check if encrypted adapter can read data and make sure it's not the same as unEncrypted adapter
         const {rotated, notRotated} =  await encryptedAdapter.rotateFileKey();
         expect(rotated.length).toEqual(2);
-        expect(rotated.filter(function(value, _index, _arr){ return value === fileName1;}).length).toEqual(1);
-        expect(rotated.filter(function(value, _index, _arr){ return value === fileName2;}).length).toEqual(1);
+        expect(rotated.filter(function(value){ return value === fileName1;}).length).toEqual(1);
+        expect(rotated.filter(function(value){ return value === fileName2;}).length).toEqual(1);
         expect(notRotated.length).toEqual(0);
         result = await encryptedAdapter.getFileData(fileName1);
         expect(result instanceof Buffer).toBe(true);
@@ -122,12 +121,11 @@ describe('File encryption tests', () => {
         expect(result instanceof Buffer).toBe(true);
         expect(result.toString('utf-8')).toEqual(data2);
         const oldEncryptedData2 = fs.readFileSync(filePath2);
-
         //Check if encrypted adapter can read data and make sure it's not the same as unEncrypted adapter
         const {rotated, notRotated} =  await encryptedAdapter.rotateFileKey({oldKey: oldFileKey});
         expect(rotated.length).toEqual(2);
-        expect(rotated.filter(function(value, _index, _arr){ return value === fileName1;}).length).toEqual(1);
-        expect(rotated.filter(function(value, _index, _arr){ return value === fileName2;}).length).toEqual(1);
+        expect(rotated.filter(function(value){ return value === fileName1;}).length).toEqual(1);
+        expect(rotated.filter(function(value){ return value === fileName2;}).length).toEqual(1);
         expect(notRotated.length).toEqual(0);
         var result2 = await encryptedAdapter.getFileData(fileName1);
         expect(result2 instanceof Buffer).toBe(true);
@@ -172,20 +170,17 @@ describe('File encryption tests', () => {
         expect(result instanceof Buffer).toBe(true);
         expect(result.toString('utf-8')).toEqual(data2);
         const oldEncryptedData2 = fs.readFileSync(filePath2);
-
         //Inject unecrypted file to see if causes an issue
         const fileName3 = 'file3.txt';
         const data3 = "hello past world";
-        const filePath3 = 'files/'+directory+'/'+fileName3;
         await unEncryptedAdapter.createFile(fileName3, data3, 'text/utf8');
-
         //Check if encrypted adapter can read data and make sure it's not the same as unEncrypted adapter
         const {rotated, notRotated} =  await encryptedAdapter.rotateFileKey({oldKey: oldFileKey, fileNames: [fileName1,fileName2]});
         expect(rotated.length).toEqual(2);
-        expect(rotated.filter(function(value, _index, _arr){ return value === fileName1;}).length).toEqual(1);
-        expect(rotated.filter(function(value, _index, _arr){ return value === fileName2;}).length).toEqual(1);
+        expect(rotated.filter(function(value){ return value === fileName1;}).length).toEqual(1);
+        expect(rotated.filter(function(value){ return value === fileName2;}).length).toEqual(1);
         expect(notRotated.length).toEqual(0);
-        expect(rotated.filter(function(value, _index, _arr){ return value === fileName3;}).length).toEqual(0);
+        expect(rotated.filter(function(value){ return value === fileName3;}).length).toEqual(0);
         var result2 = await encryptedAdapter.getFileData(fileName1);
         expect(result2 instanceof Buffer).toBe(true);
         expect(result2.toString('utf-8')).toEqual(data1);
@@ -229,7 +224,6 @@ describe('File encryption tests', () => {
         expect(result instanceof Buffer).toBe(true);
         expect(result.toString('utf-8')).toEqual(data2);
         const oldEncryptedData2 = fs.readFileSync(filePath2);
-
         //Inject unecrypted file to cause an issue
         const fileName3 = 'file3.txt';
         const data3 = "hello past world";
@@ -238,15 +232,13 @@ describe('File encryption tests', () => {
         var result = await unEncryptedAdapter.getFileData(fileName3);
         expect(result instanceof Buffer).toBe(true);
         expect(result.toString('utf-8')).toEqual(data3);
-
         //Check if encrypted adapter can read data and make sure it's not the same as unEncrypted adapter
-        var expectedError = '';
         const {rotated, notRotated} =  await encryptedAdapter.rotateFileKey({oldKey: oldFileKey});
         expect(rotated.length).toEqual(2);
-        expect(rotated.filter(function(value, _index, _arr){ return value === fileName1;}).length).toEqual(1);
-        expect(rotated.filter(function(value, _index, _arr){ return value === fileName2;}).length).toEqual(1);
+        expect(rotated.filter(function(value){ return value === fileName1;}).length).toEqual(1);
+        expect(rotated.filter(function(value){ return value === fileName2;}).length).toEqual(1);
         expect(notRotated.length).toEqual(1);
-        expect(notRotated.filter(function(value, _index, _arr){ return value === fileName3;}).length).toEqual(1);
+        expect(notRotated.filter(function(value){ return value === fileName3;}).length).toEqual(1);
         var result2 = await encryptedAdapter.getFileData(fileName1);
         expect(result2 instanceof Buffer).toBe(true);
         expect(result2.toString('utf-8')).toEqual(data1);
