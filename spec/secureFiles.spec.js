@@ -140,6 +140,51 @@ describe('File encryption tests', () => {
         done()
     }, 5000);
 
+    it("should rotate key of all old encrypted files to unencrypted files", async function(done) {
+        const oldFileKey = 'oldKeyThatILoved';
+        const oldEncryptedAdapter = new FileSystemAdapter({
+            filesSubDirectory: directory,
+            fileKey: oldFileKey
+        });
+        const unEncryptedAdapter = new FileSystemAdapter({
+            filesSubDirectory: directory
+        });
+        const fileName1 = 'file1.txt';
+        const data1 = "hello world";
+        const fileName2 = 'file2.txt';
+        const data2 = "hello new world";
+        const filePath1 = 'files/'+directory+'/'+fileName1;
+        const filePath2 = 'files/'+directory+'/'+fileName2;
+        //Store original encrypted files
+        await oldEncryptedAdapter.createFile(fileName1, data1, 'text/utf8');
+        var result = await oldEncryptedAdapter.getFileData(fileName1);
+        expect(result instanceof Buffer).toBe(true);
+        expect(result.toString('utf-8')).toEqual(data1);
+        const oldEncryptedData1 = fs.readFileSync(filePath1);
+        await oldEncryptedAdapter.createFile(fileName2, data2, 'text/utf8');
+        result = await oldEncryptedAdapter.getFileData(fileName2);
+        expect(result instanceof Buffer).toBe(true);
+        expect(result.toString('utf-8')).toEqual(data2);
+        const oldEncryptedData2 = fs.readFileSync(filePath2);
+        //Check if unEncrypted adapter can read data and make sure it's not the same as oldEncrypted adapter
+        const {rotated, notRotated} =  await unEncryptedAdapter.rotateFileKey({oldKey: oldFileKey});
+        expect(rotated.length).toEqual(2);
+        expect(rotated.filter(function(value){ return value === fileName1;}).length).toEqual(1);
+        expect(rotated.filter(function(value){ return value === fileName2;}).length).toEqual(1);
+        expect(notRotated.length).toEqual(0);
+        var result2 = await unEncryptedAdapter.getFileData(fileName1);
+        expect(result2 instanceof Buffer).toBe(true);
+        expect(result2.toString('utf-8')).toEqual(data1);
+        const encryptedData1 = fs.readFileSync(filePath1);
+        expect(encryptedData1.toString('utf-8')).not.toEqual(oldEncryptedData1);
+        result = await unEncryptedAdapter.getFileData(fileName2);
+        expect(result instanceof Buffer).toBe(true);
+        expect(result.toString('utf-8')).toEqual(data2);
+        const encryptedData2 = fs.readFileSync(filePath2);
+        expect(encryptedData2.toString('utf-8')).not.toEqual(oldEncryptedData2);
+        done()
+    }, 5000);
+
     it("should only encrypt specified fileNames with the new key", async function(done) {
         const oldFileKey = 'oldKeyThatILoved';
         const oldEncryptedAdapter = new FileSystemAdapter({
