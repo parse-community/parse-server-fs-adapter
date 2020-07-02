@@ -15,7 +15,7 @@ When using parse-server-fs-adapter across multiple parse-server instances it's i
 
 # Usage with parse-server
 
-### using a config file
+### Using a config file
 
 ```javascript
 {
