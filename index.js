@@ -26,8 +26,8 @@ function FileSystemAdapter(options) {
 }
 
 FileSystemAdapter.prototype.createFile = function(filename, data) {
+  let filepath = this._getLocalFilePath(filename);
   return new Promise((resolve, reject) => {
-    let filepath = this._getLocalFilePath(filename);
     try{
       if(this._fileKey !== null){	  
         const output = fs.createWriteStream(filepath);
@@ -46,14 +46,14 @@ FileSystemAdapter.prototype.createFile = function(filename, data) {
         output.write(encryptedResult);
         output.end();
         output.on('finish', function() {
-          return resolve(data);
+          resolve(data);
         });
       }else{
         const output = fs.createWriteStream(filepath);
         output.write(data);
         output.end();
         output.on('finish', function() {
-          return resolve(data);
+          resolve(data);
         });
       } 
     }catch(err){
@@ -63,10 +63,10 @@ FileSystemAdapter.prototype.createFile = function(filename, data) {
 }
 
 FileSystemAdapter.prototype.deleteFile = function(filename) {
+  let filepath = this._getLocalFilePath(filename);
+  const chunks = [];
+  const input = fs.createReadStream(filepath);
   return new Promise((resolve, reject) => {
-    let filepath = this._getLocalFilePath(filename);
-    const chunks = [];
-    const input = fs.createReadStream(filepath);
     input.read();
     input.on('data', (data) => {
       chunks.push(data);
@@ -87,10 +87,10 @@ FileSystemAdapter.prototype.deleteFile = function(filename) {
 }
 
 FileSystemAdapter.prototype.getFileData = function(filename) {
+  let filepath = this._getLocalFilePath(filename);
+  const chunks = [];
+  const input = fs.createReadStream(filepath);
   return new Promise((resolve, reject) => {
-    let filepath = this._getLocalFilePath(filename);
-    const chunks = [];
-    const input = fs.createReadStream(filepath);
     input.read();
     input.on('data', (data) => {
       chunks.push(data);
@@ -121,25 +121,25 @@ FileSystemAdapter.prototype.getFileData = function(filename) {
 }
 
 FileSystemAdapter.prototype.rotateFileKey = function(options = {}) {
+  const applicationDir = this._getApplicationDir();
+  var fileNames = [];
+  var oldKeyFileAdapter = {};
+  if (options.oldKey !== undefined) {
+    oldKeyFileAdapter = new FileSystemAdapter({filesSubDirectory: this._filesDir, fileKey: options.oldKey});
+  }else{
+    oldKeyFileAdapter = new FileSystemAdapter({filesSubDirectory: this._filesDir});
+  }
+  if (options.fileNames !== undefined){
+    fileNames = options.fileNames;
+  }else{
+    fileNames = fs.readdirSync(applicationDir); 
+    fileNames = fileNames.filter(fileName => fileName.indexOf('.') !== 0); 
+  }
+  var fileNamesNotRotated = fileNames;
+  var fileNamesRotated = [];
+  var fileNameTotal = fileNames.length;
+  var fileNameIndex = 0;
   return new Promise((resolve, _reject) => {
-    const applicationDir = this._getApplicationDir();
-    var fileNames = [];
-    var oldKeyFileAdapter = {};
-    if (options.oldKey !== undefined) {
-      oldKeyFileAdapter = new FileSystemAdapter({filesSubDirectory: this._filesDir, fileKey: options.oldKey});
-    }else{
-      oldKeyFileAdapter = new FileSystemAdapter({filesSubDirectory: this._filesDir});
-    }
-    if (options.fileNames !== undefined){
-      fileNames = options.fileNames;
-    }else{
-      fileNames = fs.readdirSync(applicationDir); 
-      fileNames = fileNames.filter(fileName => fileName.indexOf('.') !== 0); 
-    }
-    var fileNamesNotRotated = fileNames;
-    var fileNamesRotated = [];
-    var fileNameTotal = fileNames.length;
-    var fileNameIndex = 0;
     fileNames.forEach(fileName => { 
       oldKeyFileAdapter.getFileData(fileName)
       .then(plainTextData => {
