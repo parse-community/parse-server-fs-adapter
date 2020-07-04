@@ -28,40 +28,37 @@ function FileSystemAdapter(options) {
 FileSystemAdapter.prototype.createFile = function(filename, data) {
   return new Promise((resolve, reject) => {
     let filepath = this._getLocalFilePath(filename);
-    fs.writeFile(filepath, data, (err) => {
-      if(err !== null) {
-        return reject(err);
-      }
+    try{
       if(this._fileKey !== null){	  
-        try{
-          const iv = crypto.randomBytes(16);
-          const cipher = crypto.createCipheriv(algorithm, this._fileKey, iv);
-          const input = fs.createReadStream(filepath);
-          const output = fs.createWriteStream(filepath+'.enc');
-          input.pipe(cipher).pipe(output);
-          output.on('finish', function() {
-            fs.unlink(filepath, function(err) {
-              if (err !== null) {
-                return reject(err);
-              }
-              fs.rename(filepath+'.enc', filepath, function(err) {
-                if (err !== null) {
-                  return reject(err);
-                }
-                const authTag = cipher.getAuthTag();
-                fs.appendFileSync(filepath, iv);
-                fs.appendFileSync(filepath, authTag);
-                return resolve(data);
-              });
-            });
-          });
-      }catch(err){
-        return reject(err);
-      }           
+        const output = fs.createWriteStream(filepath);
+        const iv = crypto.randomBytes(16);
+        const cipher = crypto.createCipheriv(
+          algorithm,
+          this._fileKey,
+          iv
+        );
+        const encryptedResult = Buffer.concat([
+          cipher.update(data),
+          cipher.final(),
+          iv,
+          cipher.getAuthTag(),
+        ]);
+        output.write(encryptedResult);
+        output.end();
+        output.on('finish', function() {
+          return resolve(data);
+        });
       }else{
-        resolve(data);
-      }
-    });
+        const output = fs.createWriteStream(filepath);
+        output.write(data);
+        output.end();
+        output.on('finish', function() {
+          return resolve(data);
+        });
+      } 
+    }catch(err){
+      return reject(err);
+    }
   });
 }
 
@@ -86,10 +83,14 @@ FileSystemAdapter.prototype.getFileData = function(filename) {
   return new Promise((resolve, reject) => {
     let filepath = this._getLocalFilePath(filename);
     const fileKey = this._fileKey;
-    fs.readFile( filepath , function (err, data) {
-      if(err !== null) {
-        return reject(err);
-      }
+    const chunks = [];
+    const input = fs.createReadStream(filepath);
+    input.read();
+    input.on('data', (data) => {
+      chunks.push(data);
+    });
+    input.on('end', () => {
+      const data = Buffer.concat(chunks);
       if(fileKey !== null){
         const authTagLocation = data.length - 16;
         const ivLocation = data.length - 32;
@@ -100,12 +101,15 @@ FileSystemAdapter.prototype.getFileData = function(filename) {
           const decipher = crypto.createDecipheriv(algorithm, fileKey, iv);
           decipher.setAuthTag(authTag);
           const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
-          return resolve(decrypted);
+          resolve(decrypted);
         }catch(err){
-          return reject(err);
+          reject(err);
         }
       }
       resolve(data);
+    });
+    input.on('error', (err) => {
+      reject(err);
     });
   });
 }
