@@ -27,10 +27,10 @@ function FileSystemAdapter(options) {
 
 FileSystemAdapter.prototype.createFile = function(filename, data) {
   let filepath = this._getLocalFilePath(filename);
+  const stream = fs.createWriteStream(filepath);
   return new Promise((resolve, reject) => {
     try{
-      if(this._fileKey !== null){	  
-        const output = fs.createWriteStream(filepath);
+      if(this._fileKey !== null){
         const iv = crypto.randomBytes(16);
         const cipher = crypto.createCipheriv(
           algorithm,
@@ -43,16 +43,15 @@ FileSystemAdapter.prototype.createFile = function(filename, data) {
           iv,
           cipher.getAuthTag(),
         ]);
-        output.write(encryptedResult);
-        output.end();
-        output.on('finish', function() {
+        stream.write(encryptedResult);
+        stream.end();
+        stream.on('finish', function() {
           resolve(data);
         });
       }else{
-        const output = fs.createWriteStream(filepath);
-        output.write(data);
-        output.end();
-        output.on('finish', function() {
+        stream.write(data);
+        stream.end();
+        stream.on('finish', function() {
           resolve(data);
         });
       } 
@@ -65,13 +64,13 @@ FileSystemAdapter.prototype.createFile = function(filename, data) {
 FileSystemAdapter.prototype.deleteFile = function(filename) {
   let filepath = this._getLocalFilePath(filename);
   const chunks = [];
-  const input = fs.createReadStream(filepath);
+  const stream = fs.createReadStream(filepath);
   return new Promise((resolve, reject) => {
-    input.read();
-    input.on('data', (data) => {
+    stream.read();
+    stream.on('data', (data) => {
       chunks.push(data);
     });
-    input.on('end', () => {
+    stream.on('end', () => {
       const data = Buffer.concat(chunks);
       fs.unlink(filepath, (err) => {
         if(err !== null) {
@@ -80,7 +79,7 @@ FileSystemAdapter.prototype.deleteFile = function(filename) {
         resolve(data);
       });
     });
-    input.on('error', (err) => {
+    stream.on('error', (err) => {
       reject(err);
     });
   });
@@ -88,14 +87,14 @@ FileSystemAdapter.prototype.deleteFile = function(filename) {
 
 FileSystemAdapter.prototype.getFileData = function(filename) {
   let filepath = this._getLocalFilePath(filename);
-  const chunks = [];
-  const input = fs.createReadStream(filepath);
+  const stream = fs.createReadStream(filepath);
+  stream.read();
   return new Promise((resolve, reject) => {
-    input.read();
-    input.on('data', (data) => {
+    const chunks = [];
+    stream.on('data', (data) => {
       chunks.push(data);
     });
-    input.on('end', () => {
+    stream.on('end', () => {
       const data = Buffer.concat(chunks);
       if(this._fileKey !== null){
         const authTagLocation = data.length - 16;
@@ -107,14 +106,14 @@ FileSystemAdapter.prototype.getFileData = function(filename) {
           const decipher = crypto.createDecipheriv(algorithm, this._fileKey, iv);
           decipher.setAuthTag(authTag);
           const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
-          resolve(decrypted);
+          return resolve(decrypted);
         }catch(err){
-          reject(err);
+          return reject(err);
         }
       }
       resolve(data);
     });
-    input.on('error', (err) => {
+    stream.on('error', (err) => {
       reject(err);
     });
   });
@@ -135,11 +134,11 @@ FileSystemAdapter.prototype.rotateFileKey = function(options = {}) {
     fileNames = fs.readdirSync(applicationDir); 
     fileNames = fileNames.filter(fileName => fileName.indexOf('.') !== 0); 
   }
-  var fileNamesNotRotated = fileNames;
-  var fileNamesRotated = [];
-  var fileNameTotal = fileNames.length;
-  var fileNameIndex = 0;
   return new Promise((resolve, _reject) => {
+    var fileNamesNotRotated = fileNames;
+    var fileNamesRotated = [];
+    var fileNameTotal = fileNames.length;
+    var fileNameIndex = 0;
     fileNames.forEach(fileName => { 
       oldKeyFileAdapter.getFileData(fileName)
       .then(plainTextData => {
