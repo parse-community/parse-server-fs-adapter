@@ -140,24 +140,25 @@ FileSystemAdapter.prototype.rotateFileKey = function(options = {}) {
     var fileNameTotal = fileNames.length;
     var fileNameIndex = 0;
     fileNames.forEach(fileName => { 
-      oldKeyFileAdapter.getFileData(fileName)
-      .then(plainTextData => {
-        //Overwrite file with data encrypted with new key
-        this.createFile(fileName, plainTextData)
-        .then(() => {
-          fileNamesRotated.push(fileName);
-          fileNamesNotRotated = fileNamesNotRotated.filter(function(value){ return value !== fileName;})
-          fileNameIndex += 1;
-          if (fileNameIndex == fileNameTotal){
-            resolve({rotated: fileNamesRotated, notRotated: fileNamesNotRotated});
-          }
-        })
-        .catch(() => {
-          fileNameIndex += 1;
-          if (fileNameIndex == fileNameTotal){
-            resolve({rotated: fileNamesRotated, notRotated: fileNamesNotRotated});
-          }
-        })
+      oldKeyFileAdapter
+        .getFileData(fileName)
+        .then(plainTextData => {
+          //Overwrite file with data encrypted with new key
+          this.createFile(fileName, plainTextData)
+          .then(() => {
+            fileNamesRotated.push(fileName);
+            fileNamesNotRotated = fileNamesNotRotated.filter(function(value){ return value !== fileName;})
+            fileNameIndex += 1;
+            if (fileNameIndex == fileNameTotal){
+              resolve({rotated: fileNamesRotated, notRotated: fileNamesNotRotated});
+            }
+          })
+          .catch(() => {
+            fileNameIndex += 1;
+            if (fileNameIndex == fileNameTotal){
+              resolve({rotated: fileNamesRotated, notRotated: fileNamesNotRotated});
+            }
+          })
       })
       .catch(() => {
         fileNameIndex += 1;
