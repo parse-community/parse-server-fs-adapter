@@ -65,24 +65,6 @@ FileSystemAdapter.prototype.createFile = function(filename, data) {
 FileSystemAdapter.prototype.deleteFile = function(filename) {
   return new Promise((resolve, reject) => {
     let filepath = this._getLocalFilePath(filename);
-    fs.readFile( filepath , function (err, data) {
-      if(err !== null) {
-        return reject(err);
-      }
-      fs.unlink(filepath, (unlinkErr) => {
-      if(err !== null) {
-          return reject(unlinkErr);
-        }
-        resolve(data);
-      });
-    });
-  });
-}
-
-FileSystemAdapter.prototype.getFileData = function(filename) {
-  return new Promise((resolve, reject) => {
-    let filepath = this._getLocalFilePath(filename);
-    const fileKey = this._fileKey;
     const chunks = [];
     const input = fs.createReadStream(filepath);
     input.read();
@@ -91,14 +73,38 @@ FileSystemAdapter.prototype.getFileData = function(filename) {
     });
     input.on('end', () => {
       const data = Buffer.concat(chunks);
-      if(fileKey !== null){
+      fs.unlink(filepath, (err) => {
+        if(err !== null) {
+          return reject(err);
+        }
+        resolve(data);
+      });
+    });
+    input.on('error', (err) => {
+      reject(err);
+    });
+  });
+}
+
+FileSystemAdapter.prototype.getFileData = function(filename) {
+  return new Promise((resolve, reject) => {
+    let filepath = this._getLocalFilePath(filename);
+    const chunks = [];
+    const input = fs.createReadStream(filepath);
+    input.read();
+    input.on('data', (data) => {
+      chunks.push(data);
+    });
+    input.on('end', () => {
+      const data = Buffer.concat(chunks);
+      if(this._fileKey !== null){
         const authTagLocation = data.length - 16;
         const ivLocation = data.length - 32;
         const authTag = data.slice(authTagLocation);
         const iv = data.slice(ivLocation,authTagLocation);
         const encrypted = data.slice(0,ivLocation);
         try{
-          const decipher = crypto.createDecipheriv(algorithm, fileKey, iv);
+          const decipher = crypto.createDecipheriv(algorithm, this._fileKey, iv);
           decipher.setAuthTag(authTag);
           const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
           resolve(decrypted);
