@@ -19,22 +19,7 @@ describe('File encryption tests', () => {
         })
     });
 
-    it("should save file in it's unencrypted format", async function(done) {
-        var adapter = new FileSystemAdapter({
-            filesSubDirectory: directory
-        });
-        var filename = 'file.txt';
-        const filePath = 'files/'+directory+'/'+filename;
-        await adapter.createFile(filename, "hello world", 'text/utf8');
-        const result = await adapter.getFileData(filename);
-        expect(result instanceof Buffer).toBe(true);
-        expect(result.toString('utf-8')).toEqual("hello world");
-        const data = fs.readFileSync(filePath);
-        expect(data.toString('utf-8')).toEqual("hello world");
-        done()
-    }, 5000);
-
-    it("should save file in it's encrypted format", async function(done) {
+    it("should save file encrypted file", async function(done) {
         var adapter = new FileSystemAdapter({
             filesSubDirectory: directory,
             fileKey: '89E4AFF1-DFE4-4603-9574-BFA16BB446FD'
@@ -94,7 +79,7 @@ describe('File encryption tests', () => {
         done()
     }, 5000);
 
-    it("should rotate key of all old encrypted files to new encrypted files", async function(done) {
+    it("should rotate key of all old encrypted files to files encrypted with a new key", async function(done) {
         const oldFileKey = 'oldKeyThatILoved';
         const oldEncryptedAdapter = new FileSystemAdapter({
             filesSubDirectory: directory,
