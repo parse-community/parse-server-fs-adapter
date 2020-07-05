@@ -8,4 +8,4 @@ env:
   global:
     - COVERAGE_OPTION='./node_modules/.bin/nyc'
 script: npm run coverage
-after_scrypt: bash <(curl -s https://codecov.io/bash)
+after_success: bash <(curl -s https://codecov.io/bash)
