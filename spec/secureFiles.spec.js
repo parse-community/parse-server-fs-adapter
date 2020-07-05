@@ -19,7 +19,7 @@ describe('File encryption tests', () => {
         })
     });
 
-    it("should save file encrypted file", async function(done) {
+    it("should save encrypted file", async function(done) {
         var adapter = new FileSystemAdapter({
             filesSubDirectory: directory,
             fileKey: '89E4AFF1-DFE4-4603-9574-BFA16BB446FD'
