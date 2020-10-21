@@ -1,10 +1,15 @@
 {
   "name": "@parse/fs-files-adapter",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "File system adapter for parse-server",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/parse-community/parse-server-fs-adapter"
+  },
   "scripts": {
-    "test": "istanbul cover -x **/spec/** jasmine --captureExceptions"
+    "test": "jasmine",
+    "coverage": "nyc jasmine"
   },
   "keywords": [
     "parse-server",
@@ -15,9 +20,8 @@
   "author": "Parse",
   "license": "MIT",
   "devDependencies": {
-    "codecov": "^1.0.1",
-    "istanbul": "^0.4.2",
-    "jasmine": "^2.4.1",
+    "nyc": "^15.1.0",
+    "jasmine": "^3.5.0",
     "parse-server-conformance-tests": "^1.0.0"
   }
 }
