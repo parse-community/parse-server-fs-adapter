@@ -50,7 +50,7 @@ var api = new ParseServer({
 ```
 
 ### Rotating to a new fileKey
-Periodically you may want to rotate your fileKey for security reasons. When this is the case. Initialize the file adapter with the new key and do the following in your `index.js`:
+Periodically you may want to rotate your fileKey for security reasons. When this is the case, you can start up a development parse-server that has the same configuration as your production server. In the development server, initialize the file adapter with the new key and do the following in your `index.js`:
 
 #### Files were previously unencrypted and you want to encrypt
 ```javascript
@@ -68,10 +68,13 @@ var api = new ParseServer({
 })
 
 //This can take awhile depending on how many files and how larger they are. It will attempt to rotate the key of all files in your filesSubDirectory
+//It is not recommended to do this on the production server, deploy a development server to complete the process.
 const {rotated, notRotated} =  await api.filesAdapter.rotateFileKey();
 console.log('Files rotated to newKey: ' + rotated);
 console.log('Files that couldn't be rotated to newKey: ' + notRotated);
 ```
+
+After successfully rotating your key, you should change the `fileKey` to `newKey` on your production server and then restart the server.
 
 
 #### Files were previously encrypted with `oldKey` and you want to encrypt with `newKey`
