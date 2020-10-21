@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.1.0](https://github.com/parse-server-modules/parse-server-fs-adapter/tree/1.1.0) (2020-10-21)
+
+- Added AES encryption/decryption using native crypto [\#15](https://github.com/parse-community/parse-server-fs-adapter/pull/15) (thanks to [Corey](https://github.com/cbaker6))
+
 ## [1.0.1](https://github.com/parse-server-modules/parse-server-fs-adapter/tree/1.0.1) (2016-08-15)
 **Closed issues:**
 
