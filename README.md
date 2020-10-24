@@ -24,7 +24,7 @@ When using parse-server-fs-adapter across multiple parse-server instances it's i
   "filesAdapter": {
     "module": "@parse/fs-files-adapter",
     "options": {
-      "filesSubDirectory": "my/files/folder", // optional
+      "filesSubDirectory": "my/files/folder", // optional, defaults to ./files
       "encryptionKey": "someKey" //optional, but mandatory if you want to encrypt files
     } 
   }
@@ -37,7 +37,7 @@ When using parse-server-fs-adapter across multiple parse-server instances it's i
 var FSFilesAdapter = require('@parse/fs-files-adapter');
 
 var fsAdapter = new FSFilesAdapter({
-  "filesSubDirectory": "my/files/folder", // optional
+  "filesSubDirectory": "my/files/folder", // optional, defaults to ./files
   "encryptionKey": "someKey" //optional, but mandatory if you want to encrypt files
 });
 
@@ -56,7 +56,7 @@ Periodically you may want to rotate your encryptionKey for security reasons. Whe
 var FSFilesAdapter = require('@parse/fs-files-adapter');
 
 var fsAdapter = new FSFilesAdapter({
-  "filesSubDirectory": "my/files/folder", // optional
+  "filesSubDirectory": "my/files/folder", // optional, defaults to ./files
   "encryptionKey": "newKey" //Use the newKey
 });
 

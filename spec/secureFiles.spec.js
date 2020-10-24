@@ -19,7 +19,22 @@ describe('File encryption tests', () => {
         })
     });
 
-    it("should save encrypted file", async function(done) {
+    it("should save encrypted file in default directory", async function(done) {
+        var adapter = new FileSystemAdapter({
+            encryptionKey: '89E4AFF1-DFE4-4603-9574-BFA16BB446FD'
+        });
+        var filename = 'file2.txt';
+        const filePath = 'files/'+filename;
+        await adapter.createFile(filename, "hello world", 'text/utf8');
+        const result = await adapter.getFileData(filename);
+        expect(result instanceof Buffer).toBe(true);
+        expect(result.toString('utf-8')).toEqual("hello world");
+        const data = fs.readFileSync(filePath);
+        expect(data.toString('utf-8')).not.toEqual("hello world");
+        done()
+    }, 5000);
+
+    it("should save encrypted file in specified directory", async function(done) {
         var adapter = new FileSystemAdapter({
             filesSubDirectory: directory,
             encryptionKey: '89E4AFF1-DFE4-4603-9574-BFA16BB446FD'
