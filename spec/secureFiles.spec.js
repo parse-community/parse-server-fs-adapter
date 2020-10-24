@@ -22,7 +22,7 @@ describe('File encryption tests', () => {
     it("should save encrypted file", async function(done) {
         var adapter = new FileSystemAdapter({
             filesSubDirectory: directory,
-            fileKey: '89E4AFF1-DFE4-4603-9574-BFA16BB446FD'
+            encryptionKey: '89E4AFF1-DFE4-4603-9574-BFA16BB446FD'
         });
         var filename = 'file2.txt';
         const filePath = 'files/'+directory+'/'+filename;
@@ -41,7 +41,7 @@ describe('File encryption tests', () => {
         });
         const encryptedAdapter = new FileSystemAdapter({
             filesSubDirectory: directory,
-            fileKey: '89E4AFF1-DFE4-4603-9574-BFA16BB446FD'
+            encryptionKey: '89E4AFF1-DFE4-4603-9574-BFA16BB446FD'
         });
         const fileName1 = 'file1.txt';
         const data1 = "hello world";
@@ -61,7 +61,7 @@ describe('File encryption tests', () => {
         expect(result.toString('utf-8')).toEqual(data2);
         const unEncryptedData2 = fs.readFileSync(filePath2);
         //Check if encrypted adapter can read data and make sure it's not the same as unEncrypted adapter
-        const {rotated, notRotated} =  await encryptedAdapter.rotateFileKey();
+        const {rotated, notRotated} =  await encryptedAdapter.rotateEncryptionKey();
         expect(rotated.length).toEqual(2);
         expect(rotated.filter(function(value){ return value === fileName1;}).length).toEqual(1);
         expect(rotated.filter(function(value){ return value === fileName2;}).length).toEqual(1);
@@ -80,14 +80,14 @@ describe('File encryption tests', () => {
     }, 5000);
 
     it("should rotate key of all old encrypted files to files encrypted with a new key", async function(done) {
-        const oldFileKey = 'oldKeyThatILoved';
+        const oldEncryptionKey = 'oldKeyThatILoved';
         const oldEncryptedAdapter = new FileSystemAdapter({
             filesSubDirectory: directory,
-            fileKey: oldFileKey
+            encryptionKey: oldEncryptionKey
         });
         const encryptedAdapter = new FileSystemAdapter({
             filesSubDirectory: directory,
-            fileKey: 'newKeyThatILove'
+            encryptionKey: 'newKeyThatILove'
         });
         const fileName1 = 'file1.txt';
         const data1 = "hello world";
@@ -107,7 +107,7 @@ describe('File encryption tests', () => {
         expect(result.toString('utf-8')).toEqual(data2);
         const oldEncryptedData2 = fs.readFileSync(filePath2);
         //Check if encrypted adapter can read data and make sure it's not the same as unEncrypted adapter
-        const {rotated, notRotated} =  await encryptedAdapter.rotateFileKey({oldKey: oldFileKey});
+        const {rotated, notRotated} =  await encryptedAdapter.rotateEncryptionKey({oldKey: oldEncryptionKey});
         expect(rotated.length).toEqual(2);
         expect(rotated.filter(function(value){ return value === fileName1;}).length).toEqual(1);
         expect(rotated.filter(function(value){ return value === fileName2;}).length).toEqual(1);
@@ -126,10 +126,10 @@ describe('File encryption tests', () => {
     }, 5000);
 
     it("should rotate key of all old encrypted files to unencrypted files", async function(done) {
-        const oldFileKey = 'oldKeyThatILoved';
+        const oldEncryptionKey = 'oldKeyThatILoved';
         const oldEncryptedAdapter = new FileSystemAdapter({
             filesSubDirectory: directory,
-            fileKey: oldFileKey
+            encryptionKey: oldEncryptionKey
         });
         const unEncryptedAdapter = new FileSystemAdapter({
             filesSubDirectory: directory
@@ -152,7 +152,7 @@ describe('File encryption tests', () => {
         expect(result.toString('utf-8')).toEqual(data2);
         const oldEncryptedData2 = fs.readFileSync(filePath2);
         //Check if unEncrypted adapter can read data and make sure it's not the same as oldEncrypted adapter
-        const {rotated, notRotated} =  await unEncryptedAdapter.rotateFileKey({oldKey: oldFileKey});
+        const {rotated, notRotated} =  await unEncryptedAdapter.rotateEncryptionKey({oldKey: oldEncryptionKey});
         expect(rotated.length).toEqual(2);
         expect(rotated.filter(function(value){ return value === fileName1;}).length).toEqual(1);
         expect(rotated.filter(function(value){ return value === fileName2;}).length).toEqual(1);
@@ -171,14 +171,14 @@ describe('File encryption tests', () => {
     }, 5000);
 
     it("should only encrypt specified fileNames with the new key", async function(done) {
-        const oldFileKey = 'oldKeyThatILoved';
+        const oldEncryptionKey = 'oldKeyThatILoved';
         const oldEncryptedAdapter = new FileSystemAdapter({
             filesSubDirectory: directory,
-            fileKey: oldFileKey
+            encryptionKey: oldEncryptionKey
         });
         const encryptedAdapter = new FileSystemAdapter({
             filesSubDirectory: directory,
-            fileKey: 'newKeyThatILove'
+            encryptionKey: 'newKeyThatILove'
         });
         const unEncryptedAdapter = new FileSystemAdapter({
             filesSubDirectory: directory
@@ -205,7 +205,7 @@ describe('File encryption tests', () => {
         const data3 = "hello past world";
         await unEncryptedAdapter.createFile(fileName3, data3, 'text/utf8');
         //Check if encrypted adapter can read data and make sure it's not the same as unEncrypted adapter
-        const {rotated, notRotated} =  await encryptedAdapter.rotateFileKey({oldKey: oldFileKey, fileNames: [fileName1,fileName2]});
+        const {rotated, notRotated} =  await encryptedAdapter.rotateEncryptionKey({oldKey: oldEncryptionKey, fileNames: [fileName1,fileName2]});
         expect(rotated.length).toEqual(2);
         expect(rotated.filter(function(value){ return value === fileName1;}).length).toEqual(1);
         expect(rotated.filter(function(value){ return value === fileName2;}).length).toEqual(1);
@@ -225,14 +225,14 @@ describe('File encryption tests', () => {
     }, 5000);
 
     it("should return fileNames of those it can't encrypt with the new key", async function(done) {
-        const oldFileKey = 'oldKeyThatILoved';
+        const oldEncryptionKey = 'oldKeyThatILoved';
         const oldEncryptedAdapter = new FileSystemAdapter({
             filesSubDirectory: directory,
-            fileKey: oldFileKey
+            encryptionKey: oldEncryptionKey
         });
         const encryptedAdapter = new FileSystemAdapter({
             filesSubDirectory: directory,
-            fileKey: 'newKeyThatILove'
+            encryptionKey: 'newKeyThatILove'
         });
         const unEncryptedAdapter = new FileSystemAdapter({
             filesSubDirectory: directory
@@ -263,7 +263,7 @@ describe('File encryption tests', () => {
         expect(result instanceof Buffer).toBe(true);
         expect(result.toString('utf-8')).toEqual(data3);
         //Check if encrypted adapter can read data and make sure it's not the same as unEncrypted adapter
-        const {rotated, notRotated} =  await encryptedAdapter.rotateFileKey({oldKey: oldFileKey});
+        const {rotated, notRotated} =  await encryptedAdapter.rotateEncryptionKey({oldKey: oldEncryptionKey});
         expect(rotated.length).toEqual(2);
         expect(rotated.filter(function(value){ return value === fileName1;}).length).toEqual(1);
         expect(rotated.filter(function(value){ return value === fileName2;}).length).toEqual(1);

@@ -12,10 +12,10 @@ const algorithm = 'aes-256-gcm';
 
 function FileSystemAdapter(options) {
   options = options || {};
-  this._fileKey = null;
+  this._encryptionKey = null;
 
-  if (options.fileKey !== undefined){
-    this._fileKey = crypto.createHash('sha256').update(String(options.fileKey)).digest('base64').substr(0, 32);
+  if (options.encryptionKey !== undefined){
+    this._encryptionKey = crypto.createHash('sha256').update(String(options.encryptionKey)).digest('base64').substr(0, 32);
   }
   let filesSubDirectory = options.filesSubDirectory || '';
   this._filesDir = filesSubDirectory;
@@ -30,11 +30,11 @@ FileSystemAdapter.prototype.createFile = function(filename, data) {
   const stream = fs.createWriteStream(filepath);
   return new Promise((resolve, reject) => {
     try{
-      if(this._fileKey !== null){
+      if(this._encryptionKey !== null){
         const iv = crypto.randomBytes(16);
         const cipher = crypto.createCipheriv(
           algorithm,
-          this._fileKey,
+          this._encryptionKey,
           iv
         );
         const encryptedResult = Buffer.concat([
@@ -96,14 +96,14 @@ FileSystemAdapter.prototype.getFileData = function(filename) {
     });
     stream.on('end', () => {
       const data = Buffer.concat(chunks);
-      if(this._fileKey !== null){
+      if(this._encryptionKey !== null){
         const authTagLocation = data.length - 16;
         const ivLocation = data.length - 32;
         const authTag = data.slice(authTagLocation);
         const iv = data.slice(ivLocation,authTagLocation);
         const encrypted = data.slice(0,ivLocation);
         try{
-          const decipher = crypto.createDecipheriv(algorithm, this._fileKey, iv);
+          const decipher = crypto.createDecipheriv(algorithm, this._encryptionKey, iv);
           decipher.setAuthTag(authTag);
           const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
           return resolve(decrypted);
@@ -119,12 +119,12 @@ FileSystemAdapter.prototype.getFileData = function(filename) {
   });
 }
 
-FileSystemAdapter.prototype.rotateFileKey = function(options = {}) {
+FileSystemAdapter.prototype.rotateEncryptionKey = function(options = {}) {
   const applicationDir = this._getApplicationDir();
   var fileNames = [];
   var oldKeyFileAdapter = {};
   if (options.oldKey !== undefined) {
-    oldKeyFileAdapter = new FileSystemAdapter({filesSubDirectory: this._filesDir, fileKey: options.oldKey});
+    oldKeyFileAdapter = new FileSystemAdapter({filesSubDirectory: this._filesDir, encryptionKey: options.oldKey});
   }else{
     oldKeyFileAdapter = new FileSystemAdapter({filesSubDirectory: this._filesDir});
   }
