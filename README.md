@@ -32,7 +32,6 @@ When using parse-server-fs-adapter across multiple parse-server instances it's i
 ```
 
 ### Passing as an instance
-***Notice: If used with parse-server versions <= 4.2.0, DO NOT PASS in `PARSE_SERVER_FILE_KEY` or `encryptionKey` from parse-server. Instead pass your key directly to `FSFilesAdapter` using your own environment variable or hardcoding the string. parse-server versions > 4.2.0 can pass in `PARSE_SERVER_FILE_KEY` or `encryptionKey`.***
 
 ```javascript
 var FSFilesAdapter = require('@parse/fs-files-adapter');
