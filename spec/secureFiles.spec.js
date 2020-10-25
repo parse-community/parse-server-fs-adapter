@@ -19,6 +19,14 @@ describe('File encryption tests', () => {
         })
     });
 
+    it('should create file location based on config', async function(done) {
+      var fsAdapter = new FileSystemAdapter();
+      var config = {mount: "/parse", applicationId: "yolo"}
+      let location = fsAdapter.getFileLocation(config, "hello.txt")
+      expect(location).toBe("/parse/files/yolo/hello.txt");
+      done()
+    }, 5000)
+
     it("should save encrypted file in default directory", async function(done) {
         var adapter = new FileSystemAdapter({
             encryptionKey: '89E4AFF1-DFE4-4603-9574-BFA16BB446FD'
