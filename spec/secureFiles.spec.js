@@ -21,9 +21,9 @@ describe('File encryption tests', () => {
 
     it('should create file location based on config', async function(done) {
       var fsAdapter = new FileSystemAdapter();
-      var config = {mount: "/parse", applicationId: "yolo"}
-      let location = fsAdapter.getFileLocation(config, "hello.txt")
-      expect(location).toBe("/parse/files/yolo/hello.txt");
+      var config = {mount: '/parse', applicationId: 'yolo'}
+      let location = fsAdapter.getFileLocation(config, 'hello.txt')
+      expect(location).toBe('/parse/files/yolo/hello.txt');
       done()
     }, 5000)
 
@@ -45,6 +45,22 @@ describe('File encryption tests', () => {
     it("should save encrypted file in specified directory", async function(done) {
         var adapter = new FileSystemAdapter({
             filesSubDirectory: directory,
+            encryptionKey: '89E4AFF1-DFE4-4603-9574-BFA16BB446FD'
+        });
+        var filename = 'file2.txt';
+        const filePath = 'files/'+directory+'/'+filename;
+        await adapter.createFile(filename, "hello world", 'text/utf8');
+        const result = await adapter.getFileData(filename);
+        expect(result instanceof Buffer).toBe(true);
+        expect(result.toString('utf-8')).toEqual("hello world");
+        const data = fs.readFileSync(filePath);
+        expect(data.toString('utf-8')).not.toEqual("hello world");
+        done()
+    }, 5000);
+
+    it("should save encrypted file in specified directory when directory starts with /", async function(done) {
+        var adapter = new FileSystemAdapter({
+            filesSubDirectory: '/sub1/sub2',
             encryptionKey: '89E4AFF1-DFE4-4603-9574-BFA16BB446FD'
         });
         var filename = 'file2.txt';
