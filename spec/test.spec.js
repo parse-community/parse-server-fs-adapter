@@ -10,3 +10,9 @@ describe('FileSystemAdapter tests', () => {
 
   filesAdapterTests.testAdapter("FileSystemAdapter", fsAdapter);
 })
+
+describe('FileSystemAdapter tests - no options', () => {
+  var fsAdapter = new FileSystemAdapter();
+
+  filesAdapterTests.testAdapter("FileSystemAdapter", fsAdapter);
+})
