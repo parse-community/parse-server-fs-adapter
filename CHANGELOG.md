@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.2.0](https://github.com/parse-server-modules/parse-server-fs-adapter/tree/1.2.0) (2020-10-25)
+
+- Switch from fileKey to encryptionKey [\#17](https://github.com/parse-community/parse-server-fs-adapter/pull/17) (thanks to [Corey](https://github.com/cbaker6))
+
 ## [1.1.0](https://github.com/parse-server-modules/parse-server-fs-adapter/tree/1.1.0) (2020-10-21)
 
 - Added AES encryption/decryption using native crypto [\#15](https://github.com/parse-community/parse-server-fs-adapter/pull/15) (thanks to [Corey](https://github.com/cbaker6))
