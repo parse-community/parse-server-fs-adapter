@@ -1,7 +1,9 @@
 # parse-server-fs-adapter
-[![Build Status](https://travis-ci.org/parse-community/parse-server-fs-adapter.svg?branch=master)](https://travis-ci.org/parse-community/parse-server-fs-adapter)
+<a href="https://www.npmjs.com/package/parse-server-fs-adapter"><img alt="npm version" src="https://img.shields.io/npm/v/parse-server-fs-adapter.svg?style=flat"></a>
 [![codecov.io](https://codecov.io/github/parse-community/parse-server-fs-adapter/coverage.svg?branch=master)](https://codecov.io/github/parse-community/parse-server-fs-adapter?branch=master)
-
+<a href="https://github.com/parse-community/parse-server-fs-adapter/actions?query=workflow%3Aci+branch%3Amaster">
+  <img alt="Build status" src="https://github.com/parse-community/parse-server-fs-adapter/workflows/ci/badge.svg?branch=master">
+</a>
 parse-server file system storage adapter. 
 
 
