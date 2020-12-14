@@ -1,5 +1,5 @@
 # parse-server-fs-adapter
-<a href="https://www.npmjs.com/package/parse-server-fs-adapter"><img alt="npm version" src="https://img.shields.io/npm/v/parse-server-fs-adapter.svg?style=flat"></a>
+<a href="https://www.npmjs.com/package/@parse/fs-files-adapter"><img alt="npm version" src="https://img.shields.io/npm/v/@parse/fs-files-adapter.svg?style=flat"></a>
 [![codecov.io](https://codecov.io/github/parse-community/parse-server-fs-adapter/coverage.svg?branch=master)](https://codecov.io/github/parse-community/parse-server-fs-adapter?branch=master)
 <a href="https://github.com/parse-community/parse-server-fs-adapter/actions?query=workflow%3Aci+branch%3Amain">
   <img alt="Build status" src="https://github.com/parse-community/parse-server-fs-adapter/workflows/ci/badge.svg?branch=main">
