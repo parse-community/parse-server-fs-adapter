@@ -19,15 +19,14 @@ describe('File encryption tests', () => {
         })
     });
 
-    it('should create file location based on config', async function(done) {
+    it('should create file location based on config', async function () {
       var fsAdapter = new FileSystemAdapter();
       var config = {mount: '/parse', applicationId: 'yolo'}
       let location = fsAdapter.getFileLocation(config, 'hello.txt')
       expect(location).toBe('/parse/files/yolo/hello.txt');
-      done()
     }, 5000)
 
-    it("should save encrypted file in default directory", async function(done) {
+    it("should save encrypted file in default directory", async function() {
         var adapter = new FileSystemAdapter({
             encryptionKey: '89E4AFF1-DFE4-4603-9574-BFA16BB446FD'
         });
@@ -39,10 +38,9 @@ describe('File encryption tests', () => {
         expect(result.toString('utf-8')).toEqual("hello world");
         const data = fs.readFileSync(filePath);
         expect(data.toString('utf-8')).not.toEqual("hello world");
-        done()
     }, 5000);
 
-    it("should save encrypted file in specified directory", async function(done) {
+    it("should save encrypted file in specified directory", async function() {
         var adapter = new FileSystemAdapter({
             filesSubDirectory: directory,
             encryptionKey: '89E4AFF1-DFE4-4603-9574-BFA16BB446FD'
@@ -55,10 +53,9 @@ describe('File encryption tests', () => {
         expect(result.toString('utf-8')).toEqual("hello world");
         const data = fs.readFileSync(filePath);
         expect(data.toString('utf-8')).not.toEqual("hello world");
-        done()
     }, 5000);
 
-    it("should save encrypted file in specified directory when directory starts with /", async function(done) {
+    it("should save encrypted file in specified directory when directory starts with /", async function() {
         var adapter = new FileSystemAdapter({
             filesSubDirectory: '/sub1/sub2',
             encryptionKey: '89E4AFF1-DFE4-4603-9574-BFA16BB446FD'
@@ -71,10 +68,9 @@ describe('File encryption tests', () => {
         expect(result.toString('utf-8')).toEqual("hello world");
         const data = fs.readFileSync(filePath);
         expect(data.toString('utf-8')).not.toEqual("hello world");
-        done()
     }, 5000);
 
-    it("should rotate key of all unencrypted files to encrypted files", async function(done) {
+    it("should rotate key of all unencrypted files to encrypted files", async function() {
         const unEncryptedAdapter = new FileSystemAdapter({
             filesSubDirectory: directory
         });
@@ -115,10 +111,9 @@ describe('File encryption tests', () => {
         expect(result.toString('utf-8')).toEqual(data2);
         const encryptedData2 = fs.readFileSync(filePath2);
         expect(encryptedData2.toString('utf-8')).not.toEqual(unEncryptedData2);
-        done()
     }, 5000);
 
-    it("should rotate key of all old encrypted files to files encrypted with a new key", async function(done) {
+    it("should rotate key of all old encrypted files to files encrypted with a new key", async function() {
         const oldEncryptionKey = 'oldKeyThatILoved';
         const oldEncryptedAdapter = new FileSystemAdapter({
             filesSubDirectory: directory,
@@ -161,10 +156,9 @@ describe('File encryption tests', () => {
         expect(result.toString('utf-8')).toEqual(data2);
         const encryptedData2 = fs.readFileSync(filePath2);
         expect(encryptedData2.toString('utf-8')).not.toEqual(oldEncryptedData2);
-        done()
     }, 5000);
 
-    it("should rotate key of all old encrypted files to unencrypted files", async function(done) {
+    it("should rotate key of all old encrypted files to unencrypted files", async function() {
         const oldEncryptionKey = 'oldKeyThatILoved';
         const oldEncryptedAdapter = new FileSystemAdapter({
             filesSubDirectory: directory,
@@ -206,10 +200,9 @@ describe('File encryption tests', () => {
         expect(result.toString('utf-8')).toEqual(data2);
         const encryptedData2 = fs.readFileSync(filePath2);
         expect(encryptedData2.toString('utf-8')).not.toEqual(oldEncryptedData2);
-        done()
     }, 5000);
 
-    it("should only encrypt specified fileNames with the new key", async function(done) {
+    it("should only encrypt specified fileNames with the new key", async function() {
         const oldEncryptionKey = 'oldKeyThatILoved';
         const oldEncryptedAdapter = new FileSystemAdapter({
             filesSubDirectory: directory,
@@ -260,10 +253,9 @@ describe('File encryption tests', () => {
         expect(result.toString('utf-8')).toEqual(data2);
         const encryptedData2 = fs.readFileSync(filePath2);
         expect(encryptedData2.toString('utf-8')).not.toEqual(oldEncryptedData2);
-        done()
     }, 5000);
 
-    it("should return fileNames of those it can't encrypt with the new key", async function(done) {
+    it("should return fileNames of those it can't encrypt with the new key", async function() {
         const oldEncryptionKey = 'oldKeyThatILoved';
         const oldEncryptedAdapter = new FileSystemAdapter({
             filesSubDirectory: directory,
@@ -318,6 +310,5 @@ describe('File encryption tests', () => {
         expect(result.toString('utf-8')).toEqual(data2);
         const encryptedData2 = fs.readFileSync(filePath2);
         expect(encryptedData2.toString('utf-8')).not.toEqual(oldEncryptedData2);
-        done()
     }, 5000);
 })
