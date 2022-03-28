@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/parse-community/parse-server-fs-adapter/compare/1.2.1...1.2.2) (2022-03-28)
+
+
+### Bug Fixes
+
+* security update minimist from 1.2.5 to 1.2.6 ([#32](https://github.com/parse-community/parse-server-fs-adapter/issues/32)) ([af182bb](https://github.com/parse-community/parse-server-fs-adapter/commit/af182bb3ee8e84716464dd384ea7145b99faef49))
+
 # [1.2.1](https://github.com/parse-server-modules/parse-server-fs-adapter/tree/1.2.1) (2021-10-15)
 
 Bug Fixes
