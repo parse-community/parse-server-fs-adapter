@@ -1,3 +1,10 @@
+## [1.2.3](https://github.com/parse-community/parse-server-fs-adapter/compare/1.2.2...1.2.3) (2022-06-04)
+
+
+### Bug Fixes
+
+* security upgrade semver-regex from 3.1.3 to 3.1.4 ([#33](https://github.com/parse-community/parse-server-fs-adapter/issues/33)) ([3a311be](https://github.com/parse-community/parse-server-fs-adapter/commit/3a311bef218604f3db6fe991c5538542a2cf35ef))
+
 ## [1.2.2](https://github.com/parse-community/parse-server-fs-adapter/compare/1.2.1...1.2.2) (2022-03-28)
 
 
