@@ -29,6 +29,6 @@
     "jasmine": "4.0.2",
     "nyc": "15.1.0",
     "parse-server-conformance-tests": "1.0.0",
-    "semantic-release": "17.4.6"
+    "semantic-release": "19.0.5"
   }
 }
