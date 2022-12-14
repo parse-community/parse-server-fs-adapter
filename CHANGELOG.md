@@ -1,3 +1,10 @@
+## [1.2.4](https://github.com/parse-community/parse-server-fs-adapter/compare/1.2.3...1.2.4) (2022-12-14)
+
+
+### Bug Fixes
+
+* security upgrade qs from 6.5.2 to 6.5.3 ([#38](https://github.com/parse-community/parse-server-fs-adapter/issues/38)) ([1b7e066](https://github.com/parse-community/parse-server-fs-adapter/commit/1b7e06626cb81f32993f28abfdec2195929aceff))
+
 ## [1.2.3](https://github.com/parse-community/parse-server-fs-adapter/compare/1.2.2...1.2.3) (2022-06-04)
 
 

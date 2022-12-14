@@ -1,6 +1,6 @@
 {
   "name": "@parse/fs-files-adapter",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "File system adapter for parse-server",
   "main": "index.js",
   "repository": {
