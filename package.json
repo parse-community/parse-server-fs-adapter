@@ -8,11 +8,11 @@
     "url": "https://github.com/parse-community/parse-server-fs-adapter"
   },
   "scripts": {
+    "build": "babel src --out-dir lib --source-maps",
+    "build:watch": "babel src --out-dir lib --source-maps --watch",
     "coverage": "nyc jasmine",
     "lint": "eslint '{src,spec}/**/*.js'",
-    "lint-fix": "eslint '{src,spec}/**/*.js' --fix ./",
-    "build": "babel src --out-dir lib --source-maps",
-    "watch": "babel src --out-dir lib --source-maps --watch",
+    "lint:fix": "eslint '{src,spec}/**/*.js' --fix ./",
     "test": "jasmine"
   },
   "keywords": [
@@ -23,6 +23,10 @@
   ],
   "author": "Parse",
   "license": "MIT",
+  "files": [
+    "src",
+    "lib"
+  ],
   "devDependencies": {
     "@babel/cli": "7.10.0",
     "@babel/core": "7.20.2",
