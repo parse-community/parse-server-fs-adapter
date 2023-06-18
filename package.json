@@ -30,5 +30,11 @@
     "nyc": "15.1.0",
     "parse-server-conformance-tests": "1.0.0",
     "semantic-release": "21.0.1"
+  },
+  "dependencies": {
+    "@babel/cli": "7.10.0",
+    "@babel/core": "7.20.2",
+    "@babel/eslint-parser": "7.21.8",
+    "@babel/preset-env": "7.10.0"
   }
 }
