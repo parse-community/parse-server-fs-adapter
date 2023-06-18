@@ -31,10 +31,11 @@ jobs:
         run: npm ci
       - run: npm run lint
   test:
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         node: [ '14', '16', '18', '19' ]
+    name: Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
       COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
