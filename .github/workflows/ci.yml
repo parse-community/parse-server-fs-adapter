@@ -6,6 +6,9 @@ on:
   pull_request:
     branches:
       - '**'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   check-lint:
     name: Lint
@@ -28,7 +31,6 @@ jobs:
         run: npm ci
       - run: npm run lint
   test:
-    timeout-minutes: 10
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -54,6 +56,3 @@ jobs:
         run: npm ci
       - run: npm run coverage
       - run: bash <(curl -s https://codecov.io/bash)
-  concurrency:
-    group: ${{ github.workflow }}-${{ github.ref }}
-    cancel-in-progress: true
