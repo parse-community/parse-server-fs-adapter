@@ -15,7 +15,7 @@ function FileSystemAdapter(options) {
   this._encryptionKey = null;
 
   if (options.encryptionKey !== undefined) {
-    this._encryptionKey = crypto.createHash('sha256').update(String(options.encryptionKey)).digest('base64').substr(0, 32);
+    this._encryptionKey = crypto.createHash('sha256').update(String(options.encryptionKey)).digest('base64').substring(0, 32);
   }
   const filesSubDirectory = options.filesSubDirectory || '';
   this._filesDir = filesSubDirectory;
