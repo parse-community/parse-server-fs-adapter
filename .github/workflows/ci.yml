@@ -6,6 +6,9 @@ on:
   pull_request:
     branches:
       - '**'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   check-lint:
     name: Lint
@@ -28,7 +31,6 @@ jobs:
         run: npm ci
       - run: npm run lint
   test:
-    timeout-minutes: 10
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -40,7 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
       - name: Cache Node.js modules
@@ -54,6 +56,3 @@ jobs:
         run: npm ci
       - run: npm run coverage
       - run: bash <(curl -s https://codecov.io/bash)
-  concurrency:
-    group: ${{ github.workflow }}-${{ github.ref }}
-    cancel-in-progress: true
