@@ -105,7 +105,7 @@ FileSystemAdapter.prototype.getFileData = function(filename) {
         try {
           const decipher = crypto.createDecipheriv(algorithm, this._encryptionKey, iv);
           decipher.setAuthTag(authTag);
-          const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
+          const decrypted = Buffer.concat([ decipher.update(encrypted), decipher.final() ]);
           return resolve(decrypted);
         } catch(err) {
           return reject(err);
@@ -119,14 +119,14 @@ FileSystemAdapter.prototype.getFileData = function(filename) {
   });
 }
 
-FileSystemAdapter.prototype.rotateEncryptionKey = function(options = {}) {
+FileSystemAdapter.prototype.rotateEncryptionKey = async function(options = {}) {
   const applicationDir = this._getApplicationDir();
   let fileNames = [];
   let oldKeyFileAdapter = {};
   if (options.oldKey !== undefined) {
-    oldKeyFileAdapter = new FileSystemAdapter({filesSubDirectory: this._filesDir, encryptionKey: options.oldKey});
+    oldKeyFileAdapter = new FileSystemAdapter({ filesSubDirectory: this._filesDir, encryptionKey: options.oldKey });
   } else {
-    oldKeyFileAdapter = new FileSystemAdapter({filesSubDirectory: this._filesDir});
+    oldKeyFileAdapter = new FileSystemAdapter({ filesSubDirectory: this._filesDir });
   }
   if (options.fileNames !== undefined) {
     fileNames = options.fileNames;
@@ -134,40 +134,21 @@ FileSystemAdapter.prototype.rotateEncryptionKey = function(options = {}) {
     fileNames = fs.readdirSync(applicationDir);
     fileNames = fileNames.filter(fileName => fileName.indexOf('.') !== 0);
   }
-  return new Promise((resolve,) => {
-    let fileNamesNotRotated = fileNames;
-    const fileNamesRotated = [];
-    const fileNameTotal = fileNames.length;
-    let fileNameIndex = 0;
-    fileNames.forEach(fileName => {
-      oldKeyFileAdapter
-        .getFileData(fileName)
-        .then(plainTextData => {
-          // Overwrite file with data encrypted with new key
-          this.createFile(fileName, plainTextData)
-            .then(() => {
-              fileNamesRotated.push(fileName);
-              fileNamesNotRotated = fileNamesNotRotated.filter(function(value){ return value !== fileName;})
-              fileNameIndex += 1;
-              if (fileNameIndex == fileNameTotal){
-                resolve({rotated: fileNamesRotated, notRotated: fileNamesNotRotated});
-              }
-            })
-            .catch(() => {
-              fileNameIndex += 1;
-              if (fileNameIndex == fileNameTotal){
-                resolve({rotated: fileNamesRotated, notRotated: fileNamesNotRotated});
-              }
-            })
-        })
-        .catch(() => {
-          fileNameIndex += 1;
-          if (fileNameIndex == fileNameTotal){
-            resolve({rotated: fileNamesRotated, notRotated: fileNamesNotRotated});
-          }
-        });
-    });
-  });
+
+  let fileNamesNotRotated = fileNames;
+  const fileNamesRotated = [];
+  for await (const fileName of fileNames) {
+    try {
+      const plainTextData = await oldKeyFileAdapter.getFileData(fileName)
+      // Overwrite file with data encrypted with new key
+      await this.createFile(fileName, plainTextData)
+      fileNamesRotated.push(fileName);
+      fileNamesNotRotated = fileNamesNotRotated.filter(function(value) { return value !== fileName; });
+    } catch(err) {
+      continue;
+    }
+  }
+  return { rotated: fileNamesRotated, notRotated: fileNamesNotRotated};
 }
 
 FileSystemAdapter.prototype.getFileLocation = function(config, filename) {
