@@ -137,7 +137,7 @@ FileSystemAdapter.prototype.rotateEncryptionKey = async function(options = {}) {
 
   let fileNamesNotRotated = fileNames;
   const fileNamesRotated = [];
-  for await (const fileName of fileNames) {
+  for (const fileName of fileNames) {
     try {
       const plainTextData = await oldKeyFileAdapter.getFileData(fileName)
       // Overwrite file with data encrypted with new key
@@ -148,7 +148,7 @@ FileSystemAdapter.prototype.rotateEncryptionKey = async function(options = {}) {
       continue;
     }
   }
-  return { rotated: fileNamesRotated, notRotated: fileNamesNotRotated};
+  return { rotated: fileNamesRotated, notRotated: fileNamesNotRotated };
 }
 
 FileSystemAdapter.prototype.getFileLocation = function(config, filename) {
