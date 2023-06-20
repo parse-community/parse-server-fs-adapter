@@ -38,6 +38,7 @@ async function config() {
   const config = {
     branches: [
       'main',
+      'lint',
       // { name: 'alpha', prerelease: true },
       // { name: 'beta', prerelease: true },
       // 'next-major',
@@ -47,9 +48,9 @@ async function config() {
       // { name: 'release-3', range: '3.x.x', channel: '3.x' },
       // { name: 'release-4', range: '4.x.x', channel: '4.x' },
     ],
-    dryRun: false,
+    dryRun: true,
     debug: true,
-    ci: true,
+    ci: false,
     tagFormat: '${version}',
     plugins: [
       ['@semantic-release/commit-analyzer', {
