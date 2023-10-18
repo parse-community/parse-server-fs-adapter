@@ -1,3 +1,10 @@
+## [2.0.1](https://github.com/parse-community/parse-server-fs-adapter/compare/2.0.0...2.0.1) (2023-10-18)
+
+
+### Bug Fixes
+
+* Security bump @babel/traverse from 7.17.3 to 7.23.2 ([#51](https://github.com/parse-community/parse-server-fs-adapter/issues/51)) ([09180e8](https://github.com/parse-community/parse-server-fs-adapter/commit/09180e88fb10540d0d74a1ff30210d549070fdee))
+
 # [2.0.0](https://github.com/parse-community/parse-server-fs-adapter/compare/1.2.4...2.0.0) (2023-04-29)
 
 
