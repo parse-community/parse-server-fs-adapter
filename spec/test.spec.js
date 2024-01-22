@@ -1,7 +1,7 @@
 'use strict';
 const filesAdapterTests = require('parse-server-conformance-tests').files;
 
-const FileSystemAdapter = require('../src/index.js');
+const FileSystemAdapter = require('../index.js');
 
 describe('FileSystemAdapter tests', () => {
   const fsAdapter = new FileSystemAdapter({

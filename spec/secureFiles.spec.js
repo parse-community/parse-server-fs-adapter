@@ -1,5 +1,5 @@
 'use strict';
-const FileSystemAdapter = require('../src/index.js');
+const FileSystemAdapter = require('../index.js');
 const fs = require('fs');
 const path = require('path');
 
