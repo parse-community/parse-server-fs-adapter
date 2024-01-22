@@ -24,7 +24,7 @@ jobs:
   test:
     strategy:
       matrix:
-        node: [ '18', '19' ]
+        node: [ '14', '16', '18', '19' ]
     name: Node ${{ matrix.node }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
