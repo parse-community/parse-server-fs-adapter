@@ -2,15 +2,13 @@
   "name": "@parse/fs-files-adapter",
   "version": "2.0.1",
   "description": "File system adapter for parse-server",
-  "main": "src/index.js",
+  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/parse-community/parse-server-fs-adapter"
   },
   "scripts": {
     "coverage": "nyc jasmine",
-    "lint": "eslint '{src,spec}/**/*.js'",
-    "lint:fix": "eslint '{src,spec}/**/*.js' --fix ./",
     "test": "jasmine"
   },
   "keywords": [
@@ -21,10 +19,6 @@
   ],
   "author": "Parse",
   "license": "MIT",
-  "files": [
-    "src",
-    "README.md"
-  ],
   "devDependencies": {
     "@semantic-release/changelog": "5.0.1",
     "@semantic-release/commit-analyzer": "8.0.1",
