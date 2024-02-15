@@ -4,9 +4,9 @@
 // Stores files in local file system
 // Requires write access to the server's file system.
 
-var fs = require('fs');
-var path = require('path');
-var pathSep = require('path').sep;
+const fs = require('fs');
+const path = require('path');
+const pathSep = require('path').sep;
 const crypto = require("crypto");
 const algorithm = 'aes-256-gcm';
 
@@ -14,10 +14,10 @@ function FileSystemAdapter(options) {
   options = options || {};
   this._encryptionKey = null;
 
-  if (options.encryptionKey !== undefined){
-    this._encryptionKey = crypto.createHash('sha256').update(String(options.encryptionKey)).digest('base64').substr(0, 32);
+  if (options.encryptionKey !== undefined) {
+    this._encryptionKey = crypto.createHash('sha256').update(String(options.encryptionKey)).digest('base64').substring(0, 32);
   }
-  let filesSubDirectory = options.filesSubDirectory || '';
+  const filesSubDirectory = options.filesSubDirectory || '';
   this._filesDir = filesSubDirectory;
   this._mkdir(this._getApplicationDir());
   if (!this._applicationDirExist()) {
@@ -26,11 +26,11 @@ function FileSystemAdapter(options) {
 }
 
 FileSystemAdapter.prototype.createFile = function(filename, data) {
-  let filepath = this._getLocalFilePath(filename);
+  const filepath = this._getLocalFilePath(filename);
   const stream = fs.createWriteStream(filepath);
   return new Promise((resolve, reject) => {
-    try{
-      if(this._encryptionKey !== null){
+    try {
+      if (this._encryptionKey !== null) {
         const iv = crypto.randomBytes(16);
         const cipher = crypto.createCipheriv(
           algorithm,
@@ -48,21 +48,21 @@ FileSystemAdapter.prototype.createFile = function(filename, data) {
         stream.on('finish', function() {
           resolve(data);
         });
-      }else{
+      } else {
         stream.write(data);
         stream.end();
         stream.on('finish', function() {
           resolve(data);
         });
-      } 
-    }catch(err){
+      }
+    } catch(err) {
       return reject(err);
     }
   });
 }
 
 FileSystemAdapter.prototype.deleteFile = function(filename) {
-  let filepath = this._getLocalFilePath(filename);
+  const filepath = this._getLocalFilePath(filename);
   const chunks = [];
   const stream = fs.createReadStream(filepath);
   return new Promise((resolve, reject) => {
@@ -86,7 +86,7 @@ FileSystemAdapter.prototype.deleteFile = function(filename) {
 }
 
 FileSystemAdapter.prototype.getFileData = function(filename) {
-  let filepath = this._getLocalFilePath(filename);
+  const filepath = this._getLocalFilePath(filename);
   const stream = fs.createReadStream(filepath);
   stream.read();
   return new Promise((resolve, reject) => {
@@ -96,18 +96,18 @@ FileSystemAdapter.prototype.getFileData = function(filename) {
     });
     stream.on('end', () => {
       const data = Buffer.concat(chunks);
-      if(this._encryptionKey !== null){
+      if (this._encryptionKey !== null) {
         const authTagLocation = data.length - 16;
         const ivLocation = data.length - 32;
         const authTag = data.slice(authTagLocation);
         const iv = data.slice(ivLocation,authTagLocation);
         const encrypted = data.slice(0,ivLocation);
-        try{
+        try {
           const decipher = crypto.createDecipheriv(algorithm, this._encryptionKey, iv);
           decipher.setAuthTag(authTag);
-          const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
+          const decrypted = Buffer.concat([ decipher.update(encrypted), decipher.final() ]);
           return resolve(decrypted);
-        }catch(err){
+        } catch(err) {
           return reject(err);
         }
       }
@@ -119,55 +119,36 @@ FileSystemAdapter.prototype.getFileData = function(filename) {
   });
 }
 
-FileSystemAdapter.prototype.rotateEncryptionKey = function(options = {}) {
+FileSystemAdapter.prototype.rotateEncryptionKey = async function(options = {}) {
   const applicationDir = this._getApplicationDir();
-  var fileNames = [];
-  var oldKeyFileAdapter = {};
+  let fileNames = [];
+  let oldKeyFileAdapter = {};
   if (options.oldKey !== undefined) {
-    oldKeyFileAdapter = new FileSystemAdapter({filesSubDirectory: this._filesDir, encryptionKey: options.oldKey});
-  }else{
-    oldKeyFileAdapter = new FileSystemAdapter({filesSubDirectory: this._filesDir});
+    oldKeyFileAdapter = new FileSystemAdapter({ filesSubDirectory: this._filesDir, encryptionKey: options.oldKey });
+  } else {
+    oldKeyFileAdapter = new FileSystemAdapter({ filesSubDirectory: this._filesDir });
   }
-  if (options.fileNames !== undefined){
+  if (options.fileNames !== undefined) {
     fileNames = options.fileNames;
-  }else{
-    fileNames = fs.readdirSync(applicationDir); 
-    fileNames = fileNames.filter(fileName => fileName.indexOf('.') !== 0); 
+  } else {
+    fileNames = fs.readdirSync(applicationDir);
+    fileNames = fileNames.filter(fileName => fileName.indexOf('.') !== 0);
   }
-  return new Promise((resolve, _reject) => {
-    var fileNamesNotRotated = fileNames;
-    var fileNamesRotated = [];
-    var fileNameTotal = fileNames.length;
-    var fileNameIndex = 0;
-    fileNames.forEach(fileName => { 
-      oldKeyFileAdapter
-        .getFileData(fileName)
-        .then(plainTextData => {
-          //Overwrite file with data encrypted with new key
-          this.createFile(fileName, plainTextData)
-          .then(() => {
-            fileNamesRotated.push(fileName);
-            fileNamesNotRotated = fileNamesNotRotated.filter(function(value){ return value !== fileName;})
-            fileNameIndex += 1;
-            if (fileNameIndex == fileNameTotal){
-              resolve({rotated: fileNamesRotated, notRotated: fileNamesNotRotated});
-            }
-          })
-          .catch(() => {
-            fileNameIndex += 1;
-            if (fileNameIndex == fileNameTotal){
-              resolve({rotated: fileNamesRotated, notRotated: fileNamesNotRotated});
-            }
-          })
-      })
-      .catch(() => {
-        fileNameIndex += 1;
-        if (fileNameIndex == fileNameTotal){
-          resolve({rotated: fileNamesRotated, notRotated: fileNamesNotRotated});
-        }
-      });
-    });
-  });
+
+  let fileNamesNotRotated = fileNames;
+  const fileNamesRotated = [];
+  for (const fileName of fileNames) {
+    try {
+      const plainTextData = await oldKeyFileAdapter.getFileData(fileName)
+      // Overwrite file with data encrypted with new key
+      await this.createFile(fileName, plainTextData)
+      fileNamesRotated.push(fileName);
+      fileNamesNotRotated = fileNamesNotRotated.filter(function(value) { return value !== fileName; });
+    } catch(err) {
+      continue;
+    }
+  }
+  return { rotated: fileNamesRotated, notRotated: fileNamesNotRotated };
 }
 
 FileSystemAdapter.prototype.getFileLocation = function(config, filename) {
@@ -177,20 +158,20 @@ FileSystemAdapter.prototype.getFileLocation = function(config, filename) {
 /*
   Helpers
  --------------- */
- FileSystemAdapter.prototype._getApplicationDir = function() {
+FileSystemAdapter.prototype._getApplicationDir = function() {
   if (this._filesDir) {
     return path.join('files', this._filesDir);
   } else {
     return 'files';
   }
- }
+}
 
 FileSystemAdapter.prototype._applicationDirExist = function() {
   return fs.existsSync(this._getApplicationDir());
 }
 
 FileSystemAdapter.prototype._getLocalFilePath = function(filename) {
-  let applicationDir = this._getApplicationDir();
+  const applicationDir = this._getApplicationDir();
   if (!fs.existsSync(applicationDir)) {
     this._mkdir(applicationDir);
   }
@@ -199,20 +180,19 @@ FileSystemAdapter.prototype._getLocalFilePath = function(filename) {
 
 FileSystemAdapter.prototype._mkdir = function(dirPath) {
   // snippet found on -> https://gist.github.com/danherbert-epam/3960169
-  let dirs = dirPath.split(pathSep);
-  var root = "";
+  const dirs = dirPath.split(pathSep);
+  let root = "";
 
   while (dirs.length > 0) {
-    var dir = dirs.shift();
+    const dir = dirs.shift();
     if (dir === "") { // If directory starts with a /, the first path will be an empty string.
       root = pathSep;
     }
     if (!fs.existsSync(path.join(root, dir))) {
       try {
         fs.mkdirSync(path.join(root, dir));
-      }
-      catch (e) {
-        if ( e.code == 'EACCES' ) {
+      } catch (err) {
+        if (err.code == 'EACCES') {
           throw new Error("PERMISSION ERROR: In order to use the FileSystemAdapter, write access to the server's file system is required.");
         }
       }

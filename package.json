@@ -8,8 +8,8 @@
     "url": "https://github.com/parse-community/parse-server-fs-adapter"
   },
   "scripts": {
-    "test": "jasmine",
-    "coverage": "nyc jasmine"
+    "coverage": "nyc jasmine",
+    "test": "jasmine"
   },
   "keywords": [
     "parse-server",
