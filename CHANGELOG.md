@@ -1,3 +1,15 @@
+# [3.0.0](https://github.com/parse-community/parse-server-fs-adapter/compare/2.0.1...3.0.0) (2024-02-18)
+
+
+### Features
+
+* Add Node 20 support; remove Node 14, 16 support ([#60](https://github.com/parse-community/parse-server-fs-adapter/issues/60)) ([a913ae1](https://github.com/parse-community/parse-server-fs-adapter/commit/a913ae18c922bf29477244e4a02888f981984cc0))
+
+
+### BREAKING CHANGES
+
+* Removes support for Node 14 and 16 ([a913ae1](a913ae1))
+
 ## [2.0.1](https://github.com/parse-community/parse-server-fs-adapter/compare/2.0.0...2.0.1) (2023-10-18)
 
 
