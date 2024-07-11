@@ -1,21 +1,24 @@
 'use strict';
 const FileSystemAdapter = require('../index.js');
 const fs = require('fs');
+const os = require('os')
 const path = require('path');
 
 describe('File encryption tests', () => {
   const directory = 'sub1/sub2';
 
   afterEach(function() {
-    const filePath = path.join('files', directory);
-    const fileNames = fs.readdirSync(filePath);
+    if(this.skipCleanup) return;
+    const filesDir = this.filesDir ?? 'files';
+    const fileNames = fs.readdirSync(filesDir);
     fileNames.filter(fileName => fileName.indexOf('.') === 0);
     fileNames.forEach(fileName => {
-      fs.unlinkSync(path.join(filePath, fileName));
+      fs.unlinkSync(path.join(filesDir, fileName));
     })
   });
 
   it('should create file location based on config', async function () {
+    this.skipCleanup = true;
     const fsAdapter = new FileSystemAdapter();
     const config = {mount: '/parse', applicationId: 'yolo'}
     const location = fsAdapter.getFileLocation(config, 'hello.txt')
@@ -23,6 +26,7 @@ describe('File encryption tests', () => {
   }, 5000)
 
   it("should save encrypted file in default directory", async function() {
+    this.skipCleanup = true;
     const adapter = new FileSystemAdapter({
       encryptionKey: '89E4AFF1-DFE4-4603-9574-BFA16BB446FD'
     });
@@ -42,7 +46,8 @@ describe('File encryption tests', () => {
       encryptionKey: '89E4AFF1-DFE4-4603-9574-BFA16BB446FD'
     });
     const filename = 'file2.txt';
-    const filePath = 'files/' + directory + '/' + filename;
+    const filePath = directory + '/' + filename;
+    this.filesDir = directory;
     await adapter.createFile(filename, "hello world", 'text/utf8');
     const result = await adapter.getFileData(filename);
     expect(result instanceof Buffer).toBe(true);
@@ -51,13 +56,23 @@ describe('File encryption tests', () => {
     expect(data.toString('utf-8')).not.toEqual("hello world");
   }, 5000);
 
-  it("should save encrypted file in specified directory when directory starts with /", async function() {
+  it("should save encrypted file in specified directory when directory is absolute", async function() {
+    const tmpDir = await new Promise( (res, rej)=> {
+      fs.mkdtemp(path.join(os.tmpdir() + 'files'), (err, dir) => {
+        if (err) {
+          rej(err);
+        } else {
+          res(dir);
+        }
+      });
+    });
     const adapter = new FileSystemAdapter({
-      filesSubDirectory: '/sub1/sub2',
+      filesSubDirectory: tmpDir + '/sub1/sub2',
       encryptionKey: '89E4AFF1-DFE4-4603-9574-BFA16BB446FD'
     });
     const filename = 'file2.txt';
-    const filePath = 'files/' + directory + '/' + filename;
+    const filePath = tmpDir + '/' + directory + '/' + filename;
+    this.filesDir = path.join(tmpDir, directory);
     await adapter.createFile(filename, "hello world", 'text/utf8');
     const result = await adapter.getFileData(filename);
     expect(result instanceof Buffer).toBe(true);
@@ -78,8 +93,9 @@ describe('File encryption tests', () => {
     const data1 = "hello world";
     const fileName2 = 'file2.txt';
     const data2 = "hello new world";
-    const filePath1 = 'files/' + directory + '/' + fileName1;
-    const filePath2 = 'files/' + directory + '/' + fileName2;
+    const filePath1 = directory + '/' + fileName1;
+    const filePath2 = directory + '/' + fileName2;
+    this.filesDir = directory;
     // Store unecrypted files
     await unEncryptedAdapter.createFile(fileName1, data1, 'text/utf8');
     let result = await unEncryptedAdapter.getFileData(fileName1);
@@ -123,8 +139,9 @@ describe('File encryption tests', () => {
     const data1 = "hello world";
     const fileName2 = 'file2.txt';
     const data2 = "hello new world";
-    const filePath1 = 'files/' + directory + '/' + fileName1;
-    const filePath2 = 'files/' + directory + '/' + fileName2;
+    const filePath1 = directory + '/' + fileName1;
+    const filePath2 = directory + '/' + fileName2;
+    this.filesDir = directory;
     // Store original encrypted files
     await oldEncryptedAdapter.createFile(fileName1, data1, 'text/utf8');
     let result = await oldEncryptedAdapter.getFileData(fileName1);
@@ -167,8 +184,9 @@ describe('File encryption tests', () => {
     const data1 = "hello world";
     const fileName2 = 'file2.txt';
     const data2 = "hello new world";
-    const filePath1 = 'files/' + directory + '/' + fileName1;
-    const filePath2 = 'files/' + directory + '/' + fileName2;
+    const filePath1 = directory + '/' + fileName1;
+    const filePath2 = directory + '/' + fileName2;
+    this.filesDir = directory;
     // Store original encrypted files
     await oldEncryptedAdapter.createFile(fileName1, data1, 'text/utf8');
     let result = await oldEncryptedAdapter.getFileData(fileName1);
@@ -215,8 +233,9 @@ describe('File encryption tests', () => {
     const data1 = "hello world";
     const fileName2 = 'file2.txt';
     const data2 = "hello new world";
-    const filePath1 = 'files/' + directory + '/' + fileName1;
-    const filePath2 = 'files/' + directory + '/' + fileName2;
+    const filePath1 = directory + '/' + fileName1;
+    const filePath2 = directory + '/' + fileName2;
+    this.filesDir = directory;
     // Store original encrypted files
     await oldEncryptedAdapter.createFile(fileName1, data1, 'text/utf8');
     let result = await oldEncryptedAdapter.getFileData(fileName1);
@@ -268,8 +287,9 @@ describe('File encryption tests', () => {
     const data1 = "hello world";
     const fileName2 = 'file2.txt';
     const data2 = "hello new world";
-    const filePath1 = 'files/' + directory + '/' + fileName1;
-    const filePath2 = 'files/' + directory + '/' + fileName2;
+    const filePath1 = directory + '/' + fileName1;
+    const filePath2 = directory + '/' + fileName2;
+    this.filesDir = directory;
     // Store original encrypted files
     await oldEncryptedAdapter.createFile(fileName1, data1, 'text/utf8');
     let result = await oldEncryptedAdapter.getFileData(fileName1);
