@@ -306,4 +306,20 @@ describe('File encryption tests', () => {
     const encryptedData2 = fs.readFileSync(filePath2);
     expect(encryptedData2.toString('utf-8')).not.toEqual(oldEncryptedData2);
   }, 5000);
+
+  it('should handle blobs on creation', async function() {
+    const adapter = new FileSystemAdapter({
+      encryptionKey: '89E4AFF1-DFE4-4603-9574-BFA16BB446FD'
+    });
+    const filename = 'file2.txt';
+    const filePath = 'files/' + filename;
+    const data = new Blob(['hello world']);
+    await adapter.createFile(filename, data);
+    const result = await adapter.getFileData(filename);
+    expect(result instanceof Buffer).toBe(true);
+    expect(result.toString('utf-8')).toEqual('hello world');
+    const fileData = fs.readFileSync(filePath);
+    expect(fileData.toString('utf-8')).not.toEqual('hello world');
+  }, 5000);
+
 })

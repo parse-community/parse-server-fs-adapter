@@ -9,6 +9,7 @@ const path = require('path');
 const pathSep = require('path').sep;
 const crypto = require("crypto");
 const algorithm = 'aes-256-gcm';
+const { Readable, Transform } = require('stream')
 
 function FileSystemAdapter(options) {
   options = options || {};
@@ -25,41 +26,81 @@ function FileSystemAdapter(options) {
   }
 }
 
-FileSystemAdapter.prototype.createFile = function(filename, data) {
+FileSystemAdapter.prototype.createFile = function (filename, data) {
   const filepath = this._getLocalFilePath(filename);
   const stream = fs.createWriteStream(filepath);
   return new Promise((resolve, reject) => {
     try {
-      if (this._encryptionKey !== null) {
-        const iv = crypto.randomBytes(16);
-        const cipher = crypto.createCipheriv(
-          algorithm,
-          this._encryptionKey,
-          iv
-        );
-        const encryptedResult = Buffer.concat([
-          cipher.update(data),
-          cipher.final(),
-          iv,
-          cipher.getAuthTag(),
-        ]);
-        stream.write(encryptedResult);
-        stream.end();
-        stream.on('finish', function() {
-          resolve(data);
-        });
+      const iv = this._encryptionKey ? crypto.randomBytes(16) : null;
+
+      const cipher =
+        this._encryptionKey && iv
+          ? crypto.createCipheriv(algorithm, this._encryptionKey, iv)
+          : null;
+
+      // when working with a Blob, it could be over the max size of a buffer, so we need to stream it
+      if (data instanceof Blob) {
+        let readableStream = data.stream();
+
+        // may come in as a web stream, so we need to convert it to a node stream
+        if (readableStream instanceof ReadableStream) {
+          readableStream = Readable.fromWeb(readableStream);
+        }
+
+        if (cipher && iv) {
+          // we need to stream the data through the cipher
+          const cipherTransform = new Transform({
+            transform(chunk, encoding, callback) {
+              try {
+                const encryptedChunk = cipher.update(chunk);
+                callback(null, encryptedChunk);
+              } catch (err) {
+                callback(err);
+              }
+            },
+            // at the end we need to push the final cipher text, iv, and auth tag
+            flush(callback) {
+              try {
+                this.push(cipher.final());
+                this.push(iv);
+                this.push(cipher.getAuthTag());
+                callback();
+              } catch (err) {
+                callback(err);
+              }
+            },
+          });
+          // pipe the stream through the cipher and then to the main stream
+          readableStream
+            .pipe(cipherTransform)
+            .on("error", reject)
+            .pipe(stream)
+            .on("error", reject);
+        } else {
+          // if we don't have a cipher, we can just pipe the stream to the main stream
+          readableStream.pipe(stream).on("error", reject);
+        }
       } else {
-        stream.write(data);
+        if (cipher && iv) {
+          const encryptedResult = Buffer.concat([
+            cipher.update(data),
+            cipher.final(),
+            iv,
+            cipher.getAuthTag(),
+          ]);
+          stream.write(encryptedResult);
+        } else {
+          stream.write(data);
+        }
         stream.end();
-        stream.on('finish', function() {
-          resolve(data);
-        });
       }
-    } catch(err) {
-      return reject(err);
+      stream.on("finish", resolve);
+      stream.on("error", reject);
+    } catch (e) {
+      reject(e);
     }
   });
-}
+};
 
 FileSystemAdapter.prototype.deleteFile = function(filename) {
   const filepath = this._getLocalFilePath(filename);
